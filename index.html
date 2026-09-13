@@ -803,8 +803,9 @@
   //  CONFIGURATION — paste your Google Apps Script URL here
   //  after you deploy it (see google_apps_script.js for setup)
   // ══════════════════════════════════════════════════════
-  var SCRIPT_URL_PROD = 'https://script.google.com/macros/s/AKfycbxgWKNM8NOmZdop4U817OQ7t2En5FC28bDaFGuwUFimbNQpxA5ZNfHPGxS8g5QPjXnI/exec';
-  var SCRIPT_URL_DEV  = 'https://script.google.com/macros/s/AKfycbxG6X95p5DFTCsd2so5dQj-8h-2jWtZikgklTsazisHQlcN7VzET9_woJI3sEqC3Lz3/exec';
+  // Both point at the script bound to the "SPR Intakes" sheet (decided 2026-09-13: that sheet is production).
+  var SCRIPT_URL_PROD = 'https://script.google.com/macros/s/AKfycbxG6X95p5DFTCsd2so5dQj-8h-2jWtZikgklTsazisHQlcN7VzET9_woJI3sEqC3Lz3/exec';
+  var SCRIPT_URL_DEV  = SCRIPT_URL_PROD;
   var IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(location.hostname) || new URLSearchParams(location.search).get('env') === 'dev';
   var SCRIPT_URL = IS_LOCAL ? SCRIPT_URL_DEV : SCRIPT_URL_PROD;
 
