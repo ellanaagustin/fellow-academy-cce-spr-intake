@@ -28,6 +28,11 @@ manifest() {
   "timeZone": "Australia/Sydney",
   "dependencies": {},
   "webapp": { "executeAs": "$1", "access": "$2" },
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/spreadsheets.currentonly",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/gmail.send"
+  ],
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8"
 }

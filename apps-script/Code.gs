@@ -16,6 +16,8 @@
 
 // ── CONFIGURE ─────────────────────────────────────────────────────
 var NOTIFICATION_EMAIL = 'agustin.ellanamickaela@gmail.com, support@fellowacademy.com.au';
+var FROM_EMAIL = 'support@fellowacademy.com.au';   // used as From when the running account is this address or has it as a Gmail "Send mail as" alias
+var FROM_NAME  = 'Fellow Academy';
 var ADMIN_EMAILS = [
   'support@fellowacademy.com.au',
   'agustin.ellanamickaela@gmail.com',
@@ -33,7 +35,7 @@ var DEFAULT_SETTINGS = {
   window_days:      120
 };
 
-var COL = { FORMAT: 8, ZOOM_DATE: 9, SELF_DATE: 12, NAME: 1, PACKAGE: 7, ZOOM_TIME: 10, ZOOM_TZ: 11, EMAIL: 2 };
+var COL = { FORMAT: 8, ZOOM_DATE: 9, SELF_DATE: 12, NAME: 1, PACKAGE: 7, ZOOM_TIME: 10, ZOOM_TZ: 11, EMAIL: 2, PARTNER_NAME: 5, PARTNER_EMAIL: 6 };
 
 // ── Entry points ───────────────────────────────────────────────────
 function doGet(e) {
@@ -339,6 +341,108 @@ function adminSetRange(from, to, patch) {
   return adminGetMonth(from.slice(0, 7));
 }
 
+// Moves one booking (sheet row) to newDate. opts = { notify: bool, force: bool, ym: 'yyyy-MM' to return }.
+// Without force, a full or blocked target returns { needsConfirm: true, reason } and changes nothing.
+function adminMoveBooking(row, newDate, opts) {
+  var who = requireAdmin();
+  opts = opts || {};
+  row = Number(row);
+  if (!(row >= 2)) throw new Error('Bad row');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(newDate)) throw new Error('Bad date');
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  var booking;
+  try {
+    var ctx = loadContext();
+    var ss = ctx.ss;
+    var tz = ss.getSpreadsheetTimeZone();
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet || row > sheet.getLastRow()) throw new Error('Booking not found');
+    var values = sheet.getRange(row, 1, 1, 17).getValues()[0];
+    var isZoom = String(values[COL.FORMAT]).toLowerCase().indexOf('zoom') !== -1;
+    var oldDate = rowBookingDate(values, tz);
+    if (!oldDate) throw new Error('Row has no booking date');
+    if (oldDate === newDate) throw new Error('Already on that date');
+
+    var override = ctx.overrides[newDate] || {};
+    var capacity = (override.capacity === '' || override.capacity == null) ? ctx.settings.default_capacity : Number(override.capacity);
+    var booked = ctx.booked[newDate] || 0;
+    var reason = override.blocked ? 'blocked' : (booked >= capacity ? 'full' : '');
+    if (reason && !opts.force) return { needsConfirm: true, reason: reason, booked: booked, capacity: capacity };
+
+    var col = (isZoom ? COL.ZOOM_DATE : COL.SELF_DATE) + 1;
+    sheet.getRange(row, col).setNumberFormat('@').setValue(newDate);
+    booking = {
+      name: String(values[COL.NAME]), email: String(values[COL.EMAIL]),
+      partnerName: String(values[COL.PARTNER_NAME]), partnerEmail: String(values[COL.PARTNER_EMAIL]),
+      format: isZoom ? 'Zoom' : 'Self-record', pkg: String(values[COL.PACKAGE]),
+      time: isZoom ? (toTimeStr(values[COL.ZOOM_TIME], tz) + ' ' + String(values[COL.ZOOM_TZ]).toUpperCase()).trim() : '',
+      oldDate: oldDate, newDate: newDate, tz: tz
+    };
+  } finally {
+    lock.releaseLock();
+  }
+  var email = { attempted: !!opts.notify, to: booking.email, error: '', from: '' };
+  if (opts.notify) {
+    try { email.from = sendMoveEmail(booking, who); }
+    catch (err) { email.error = String(err && err.message || err); Logger.log('Move email error: ' + err); }
+  }
+  var data = adminGetMonth(opts.ym || newDate.slice(0, 7));
+  data.email = email;
+  return data;
+}
+
+function sendMoveEmail(b, movedBy) {
+  if (!b.email) return;
+  var fmt = function (d) { var p = d.split('-').map(Number); return Utilities.formatDate(new Date(p[0], p[1] - 1, p[2]), b.tz, 'EEEE d MMMM yyyy'); };
+  var html = [
+    '<div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;color:#1a1a1a;">',
+    '<div style="background:#8a6a25;padding:20px 28px;border-radius:4px 4px 0 0;">',
+      '<p style="margin:0;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Fellow Academy · CCE SPR</p>',
+      '<h1 style="margin:6px 0 0;font-size:20px;font-weight:600;color:#fff;">Your session date has changed</h1>',
+    '</div>',
+    '<div style="border:1px solid #e0ddd3;border-top:none;border-radius:0 0 4px 4px;padding:28px;">',
+      '<p style="margin:0 0 18px;font-size:14px;">Hi ' + b.name + ',</p>',
+      '<p style="margin:0 0 18px;font-size:14px;line-height:1.6;">Your Station Performance Review session has been moved to a new date. Everything else about your booking stays the same.</p>',
+      section('New booking', [
+        row('New date', '<strong>' + fmt(b.newDate) + '</strong>'),
+        row('Previous date', fmt(b.oldDate)),
+        row('Format', b.format + (b.time ? ' · ' + b.time : '')),
+        row('Package', b.pkg)
+      ]),
+      '<p style="margin:0 0 18px;font-size:13px;color:#6e6a62;line-height:1.6;">Case materials and session details will follow the usual schedule for the new date. If this date does not work for you, reply to this email and we will sort it out.</p>',
+      '<hr style="border:none;border-top:1px solid #e0ddd3;margin:28px 0 16px;">',
+      '<p style="margin:0;font-size:11px;color:#aaa;letter-spacing:0.06em;text-transform:uppercase;">Fellow Academy · Sent by ' + movedBy + '</p>',
+    '</div>',
+    '</div>'
+  ].join('');
+  var cc = [b.partnerEmail, NOTIFICATION_EMAIL].filter(Boolean).join(', ');
+  return sendBrandedEmail({ to: b.email, cc: cc, subject: 'Your SPR session has moved to ' + fmt(b.newDate), htmlBody: html });
+}
+
+// Sends as support@fellowacademy.com.au when possible; otherwise as the running account, named "Fellow Academy" with reply-to support@.
+function sendBrandedEmail(m) {
+  var opts = { htmlBody: m.htmlBody, name: FROM_NAME, replyTo: FROM_EMAIL };
+  if (m.cc) opts.cc = m.cc;
+  var me = Session.getEffectiveUser().getEmail();
+  if (me !== FROM_EMAIL) {
+    // Works only if FROM_EMAIL is a "Send mail as" alias of the running account; otherwise fall back to the account itself.
+    try {
+      GmailApp.sendEmail(m.to, m.subject, '', Object.assign({ from: FROM_EMAIL }, opts));
+      return FROM_EMAIL;
+    } catch (err) {
+      Logger.log('Send as ' + FROM_EMAIL + ' failed for ' + me + ': ' + err);
+    }
+  }
+  GmailApp.sendEmail(m.to, m.subject, '', opts);
+  return me;
+}
+
+// Run once from the script editor after scopes change so the owner grants them for the "execute as me" deployment.
+function authorizeOnce() {
+  Logger.log('Authorised as ' + Session.getEffectiveUser().getEmail());
+}
+
 function adminSetSettings(patch) {
   requireAdmin();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -454,7 +558,7 @@ function sendNotificationEmail(data) {
     '</div>'
   ].join('');
 
-  MailApp.sendEmail({ to: NOTIFICATION_EMAIL, subject: subject, htmlBody: html });
+  sendBrandedEmail({ to: NOTIFICATION_EMAIL, subject: subject, htmlBody: html });
 }
 
 function section(title, rows) {
