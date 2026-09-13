@@ -1,7 +1,7 @@
 {
   "timeZone": "Australia/Sydney",
   "dependencies": {},
-  "webapp": { "executeAs": "USER_ACCESSING", "access": "MYSELF" },
+  "webapp": { "executeAs": "USER_ACCESSING", "access": "ANYONE" },
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8"
 }

@@ -79,9 +79,10 @@ Payload shape is unchanged, so the old page keeps working during rollout.
 ## Admin page (decided 2026-09-13: Apps Script hosted, Google sign-in)
 
 Served by the same script project as a second web-app deployment using HtmlService.
-Deployment settings: Execute as "User accessing the web app", access "Only myself" for dev,
-"Anyone within fellowacademy.com.au" (or a named account) for prod. Google handles sign-in.
-The page runs as the signed-in admin, so Sheet edit permission is the real access control.
+Deployment settings: Execute as "User accessing the web app", access "Anyone" for dev and prod.
+"Anyone" still requires Google sign-in; "Only myself" or a domain restriction blocks the gmail admins
+before doGet runs (Drive shows "Sorry, unable to open the file at this time"). ADMIN_EMAILS and
+Sheet edit permission are the real access control, since the page runs as the signed-in admin.
 
 Styled to match index.html (same fonts, palette, section cards). Screens:
 - Month calendar. Each day shows booked/capacity, state colour (open, full, blocked, past/too soon).
