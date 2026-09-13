@@ -124,3 +124,4 @@ Old page + new script is safe. New page + old script is not, so the script alway
 ## Progress log
 
 - 2026-09-13 Backups taken (Drive copy + local CSV). Dev sheet and dev script created by Jeraisy. Page selects script URL by hostname. Git linked to GitHub, branch feature/date-rules.
+- 2026-09-13 Phases 1–3 coded on branch: Code.gs (Settings/Dates tabs, GET availability, POST validation under lock, admin functions), admin.html (neumorphic admin calendar), index.html (calendar pickers, availability polling, reads JSON reply, old time-slot blocks removed). Node syntax check on all three; `node tests/rules.test.js` passes 19 rule checks. Awaiting dev deployment for live GET/POST tests.

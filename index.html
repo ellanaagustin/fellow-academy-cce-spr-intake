@@ -314,6 +314,49 @@
 
   .reveal .field { display: flex; flex-direction: column; }
 
+  /* ─── Date calendar ─── */
+  .cal { grid-column: 1 / -1; }
+  .cal-box {
+    background: var(--bg);
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    padding: 14px 14px 12px;
+    max-width: 380px;
+  }
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .cal-month { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 500; }
+  .cal-nav button {
+    width: 34px; height: 34px; border: 1px solid var(--rule-strong); border-radius: 3px; background: var(--bg-card);
+    color: var(--gold); font-size: 16px; cursor: pointer; line-height: 1;
+  }
+  .cal-nav button:hover { border-color: var(--gold-soft); }
+  .cal-nav button:disabled { opacity: 0.35; cursor: not-allowed; }
+  .cal-dow, .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow span { text-align: center; font-size: 9.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); padding-bottom: 6px; }
+  .cal-day {
+    aspect-ratio: 1; border: 1px solid transparent; border-radius: 3px; background: var(--bg-card);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); cursor: pointer;
+    font-variant-numeric: tabular-nums; transition: border-color 0.12s, background 0.12s;
+  }
+  .cal-day:hover { border-color: var(--gold-soft); }
+  .cal-day.empty { visibility: hidden; }
+  .cal-day.off { color: var(--rule-strong); background: transparent; cursor: not-allowed; }
+  .cal-day.off:hover { border-color: transparent; }
+  .cal-day.full { color: var(--text-faint); background: var(--bg-section); text-decoration: line-through; cursor: not-allowed; }
+  .cal-day.full:hover { border-color: transparent; }
+  .cal-day.selected { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 600; }
+  .cal-day:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .cal-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; }
+  .cal-foot .picked { font-weight: 600; color: var(--text); }
+  .cal-legend { font-size: 11px; color: var(--text-faint); }
+  .cal-legend s { color: var(--text-faint); }
+  .cal-box.loading .cal-day { color: transparent; background: var(--bg-section); pointer-events: none; animation: calpulse 1.2s ease-in-out infinite; }
+  @keyframes calpulse { 50% { opacity: 0.55; } }
+  @media (prefers-reduced-motion: reduce) { .cal-box.loading .cal-day { animation: none; } }
+  .cal-msg { display: none; margin-top: 10px; font-size: 13px; color: var(--error); line-height: 1.5; }
+  .cal-msg.active { display: block; }
+  .cal-msg.info { color: var(--text-muted); }
+
   /* ─── Station selector ─── */
   .selector-helper {
     background: var(--gold-bg);
@@ -693,9 +736,11 @@
         <p>At the scheduled time, you and your partner join the Zoom. The meeting auto-records to our cloud. Once you're done, simply leave the meeting and we'll handle the rest.</p>
 
         <div class="fields">
-          <div class="field">
-            <label>Preferred date <span class="req">*</span></label>
-            <input type="date" name="zoom_date" id="zoom_date">
+          <div class="field cal">
+            <label>Preferred date <span class="req">*</span><span class="hint">earliest is 2 days from today</span></label>
+            <div class="cal-box" id="cal-zoom" data-for="zoom_date"></div>
+            <input type="hidden" name="zoom_date" id="zoom_date">
+            <div class="cal-msg" id="msg-zoom"></div>
           </div>
           <div class="field">
             <label>Preferred time <span class="req">*</span></label>
@@ -714,9 +759,6 @@
             </select>
           </div>
         </div>
-        <div id="zoom-blocked-warning" style="display:none; margin-top:16px; background:#fdf0f0; border:1px solid #c97070; border-radius:3px; padding:14px 18px; font-size:13.5px; color:#b04040; line-height:1.55;">
-          This time slot is already fully booked. Please select a different date or time.
-        </div>
       </div>
 
       <!-- Self-record reveal -->
@@ -729,9 +771,11 @@
         <p>Record the station on your own device (phone camera or laptop webcam). Start the recording, open your case information, and take 5 minutes to read through it. When you are ready, say <em>"starting now"</em> on camera and run the 15-minute station. Each station is 20 minutes in total. When done, send the video to us.</p>
 
         <div class="fields" style="grid-template-columns: 1fr 1fr;">
-          <div class="field">
-            <label>Expected recording date <span class="req">*</span></label>
-            <input type="date" name="self_date" id="self_date">
+          <div class="field cal">
+            <label>Expected recording date <span class="req">*</span><span class="hint">earliest is 2 days from today</span></label>
+            <div class="cal-box" id="cal-self" data-for="self_date"></div>
+            <input type="hidden" name="self_date" id="self_date">
+            <div class="cal-msg" id="msg-self"></div>
           </div>
           <div class="field">
             <label>How you'll record <span class="req">*</span></label>
@@ -1039,7 +1083,7 @@
   // ══════════════════════════════════════════════════════
   var SCRIPT_URL_PROD = 'https://script.google.com/macros/s/AKfycbxgWKNM8NOmZdop4U817OQ7t2En5FC28bDaFGuwUFimbNQpxA5ZNfHPGxS8g5QPjXnI/exec';
   var SCRIPT_URL_DEV  = 'https://script.google.com/macros/s/AKfycbxG6X95p5DFTCsd2so5dQj-8h-2jWtZikgklTsazisHQlcN7VzET9_woJI3sEqC3Lz3/exec';
-  var IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(location.hostname);
+  var IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(location.hostname) || new URLSearchParams(location.search).get('env') === 'dev';
   var SCRIPT_URL = IS_LOCAL ? SCRIPT_URL_DEV : SCRIPT_URL_PROD;
 
   // ── Progressive-disclosure: Zoom vs self-record ──────────
@@ -1057,16 +1101,17 @@
       zoomReveal.classList.toggle('active', isZoom);
       selfReveal.classList.toggle('active', isSelf);
 
-      // Toggle required attrs accordingly
+      // Toggle required attrs accordingly (hidden date inputs are validated in handleSubmit)
       zoomFields.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.required = isZoom;
+        if (el && el.type !== 'hidden') el.required = isZoom;
       });
       selfFields.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.required = isSelf;
+        if (el && el.type !== 'hidden') el.required = isSelf;
       });
 
+      refreshAvailability();
       updateSelectedStyling();
     });
   });
@@ -1174,59 +1219,107 @@
     updateSelectedStyling();
   }));
 
-  // ── Blocked Zoom time slots ─────────────────────────────
-  // All periods stored as AEST (UTC+10) date + minutes-from-midnight
-  const blockedPeriods = [
-    { date: '2026-05-30', start: 600,  end: 720  }, // May 30  10:00–12:00 AEST
-    { date: '2026-05-31', start: 630,  end: 750  }, // May 31  10:30–12:30 AEST
-    { date: '2026-06-05', start: 780,  end: 900  }, // Jun  5  13:00–15:00 AEST
-  ];
+  // ── Date availability (served by the script, computed in Sydney time) ──
+  // avail = { today, minDate, maxDate, unavailable: Set }
+  let avail = null;
+  let availFetchedAt = 0;
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-  // UTC offset in minutes for each timezone option
-  const tzOffsetMin = {
-    aest: 600,   // UTC+10
-    aedt: 660,   // UTC+11
-    acst: 570,   // UTC+9:30
-    awst: 480,   // UTC+8
-    nzst: 720,   // UTC+12
-  };
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function addDays(s, n) { const p = s.split('-').map(Number); return new Date(Date.UTC(p[0], p[1] - 1, p[2] + n)).toISOString().slice(0, 10); }
+  function shiftMonth(ym, n) { const p = ym.split('-').map(Number); return new Date(Date.UTC(p[0], p[1] - 1 + n, 1)).toISOString().slice(0, 7); }
+  function longDate(s) { const p = s.split('-').map(Number); const d = new Date(Date.UTC(p[0], p[1] - 1, p[2])); return DOW[d.getUTCDay()] + ' ' + p[2] + ' ' + MONTHS[p[1] - 1] + ' ' + p[0]; }
 
-  function checkZoomAvailability() {
-    const dateVal = document.getElementById('zoom_date').value;
-    const timeVal = document.getElementById('zoom_time').value;
-    const tzVal   = document.getElementById('zoom_timezone').value;
-    const warning = document.getElementById('zoom-blocked-warning');
-
-    if (!dateVal || !timeVal || !tzVal || !tzOffsetMin[tzVal]) {
-      warning.style.display = 'none';
-      return true;
-    }
-
-    const [h, m]     = timeVal.split(':').map(Number);
-    const localMins  = h * 60 + m;
-    const localOffset = tzOffsetMin[tzVal];
-
-    // Convert to AEST: local → UTC → AEST
-    let aestMins = localMins - localOffset + 600;
-    let aestDate = new Date(dateVal + 'T12:00:00'); // noon to avoid DST edge issues
-
-    if (aestMins < 0)    { aestMins += 1440; aestDate.setDate(aestDate.getDate() - 1); }
-    if (aestMins >= 1440){ aestMins -= 1440; aestDate.setDate(aestDate.getDate() + 1); }
-
-    const aestDateStr = aestDate.toISOString().split('T')[0];
-
-    const blocked = blockedPeriods.some(p =>
-      p.date === aestDateStr && aestMins >= p.start && aestMins < p.end
-    );
-
-    warning.style.display = blocked ? 'block' : 'none';
-    return !blocked;
+  function applyAvailability(a) {
+    avail = { today: a.today, minDate: a.minDate, maxDate: a.maxDate, unavailable: new Set(a.unavailable || []) };
+    availFetchedAt = Date.now();
+    calendars.forEach(c => c.render());
   }
 
-  ['zoom_date', 'zoom_time', 'zoom_timezone'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('change', checkZoomAvailability);
-  });
+  function fetchAvailability() {
+    return fetch(SCRIPT_URL, { method: 'GET' })
+      .then(r => r.json())
+      .then(a => { if (!a || !a.minDate) throw new Error('bad availability'); applyAvailability(a); })
+      .catch(err => {
+        console.warn('availability fetch failed', err);
+        if (!avail) {
+          // Fallback: apply only the lead-time rule from the device clock; the server still enforces everything on submit.
+          const t = new Date(); const today = t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+          applyAvailability({ today, minDate: addDays(today, 2), maxDate: addDays(today, 120), unavailable: [] });
+          calendars.forEach(c => c.message('Live availability could not be loaded. Your date will be confirmed on submit.', true));
+        }
+      });
+  }
+
+  // Re-fetch when a date panel opens, unless fetched in the last 10 s
+  function refreshAvailability() {
+    if (Date.now() - availFetchedAt > 10000) fetchAvailability();
+  }
+
+  function makeCalendar(box) {
+    const input = document.getElementById(box.dataset.for);
+    const msg = document.getElementById('msg-' + box.id.replace('cal-', ''));
+    let ym = null;
+    const cal = {
+      render() {
+        if (!avail) { box.classList.add('loading'); box.innerHTML = skeleton(); return; }
+        if (!ym) ym = (input.value || avail.minDate).slice(0, 7);
+        const p = ym.split('-').map(Number);
+        const daysInMonth = new Date(Date.UTC(p[0], p[1], 0)).getUTCDate();
+        const lead = (new Date(Date.UTC(p[0], p[1] - 1, 1)).getUTCDay() + 6) % 7;
+        let html = '<div class="cal-nav">' +
+          '<button type="button" data-nav="-1" aria-label="Previous month"' + (ym <= avail.minDate.slice(0, 7) ? ' disabled' : '') + '>‹</button>' +
+          '<span class="cal-month">' + MONTHS[p[1] - 1] + ' ' + p[0] + '</span>' +
+          '<button type="button" data-nav="1" aria-label="Next month"' + (ym >= avail.maxDate.slice(0, 7) ? ' disabled' : '') + '>›</button></div>' +
+          '<div class="cal-dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div><div class="cal-days">';
+        for (let i = 0; i < lead; i++) html += '<button type="button" class="cal-day empty" tabindex="-1"></button>';
+        for (let d = 1; d <= daysInMonth; d++) {
+          const ds = ym + '-' + pad(d);
+          const off = ds < avail.minDate || ds > avail.maxDate;
+          const full = !off && avail.unavailable.has(ds);
+          const sel = ds === input.value;
+          const cls = 'cal-day' + (off ? ' off' : '') + (full ? ' full' : '') + (sel ? ' selected' : '');
+          const label = longDate(ds) + (off ? ', not selectable' : full ? ', unavailable' : '');
+          html += '<button type="button" class="' + cls + '" data-date="' + ds + '" aria-label="' + label + '"' + ((off || full) ? ' aria-disabled="true"' : '') + '>' + d + '</button>';
+        }
+        html += '</div><div class="cal-foot"><span class="picked">' + (input.value ? longDate(input.value) : 'No date selected') + '</span>' +
+          '<span class="cal-legend"><s>21</s> unavailable</span></div>';
+        box.classList.remove('loading');
+        box.innerHTML = html;
+        if (input.value && avail.unavailable.has(input.value)) {
+          cal.message('Your selected date is no longer available. Please choose another.');
+        }
+      },
+      message(text, info) {
+        msg.textContent = text || '';
+        msg.classList.toggle('active', !!text);
+        msg.classList.toggle('info', !!info);
+      }
+    };
+    box.addEventListener('click', e => {
+      const nav = e.target.closest('[data-nav]');
+      if (nav && !nav.disabled) { ym = shiftMonth(ym, Number(nav.dataset.nav)); cal.render(); return; }
+      const day = e.target.closest('.cal-day');
+      if (!day || day.classList.contains('empty') || day.getAttribute('aria-disabled') === 'true') return;
+      input.value = day.dataset.date;
+      cal.message('');
+      cal.render();
+    });
+    return cal;
+  }
+
+  function skeleton() {
+    let html = '<div class="cal-nav"><button type="button" disabled>‹</button><span class="cal-month">Loading…</span><button type="button" disabled>›</button></div>' +
+      '<div class="cal-dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div><div class="cal-days">';
+    for (let i = 0; i < 35; i++) html += '<button type="button" class="cal-day" tabindex="-1">0</button>';
+    return html + '</div>';
+  }
+
+  const calendars = Array.from(document.querySelectorAll('.cal-box')).map(makeCalendar);
+  calendars.forEach(c => c.render());
+  fetchAvailability();
+  setInterval(() => { if (document.visibilityState === 'visible') fetchAvailability(); }, 30000);
 
   // ── Submit handler ──────────────────────────────────────
   function handleSubmit(e) {
@@ -1303,12 +1396,22 @@
       feedback_expectations:    fd.get('feedback_expectations') || ''
     };
 
-    // Block submission if a blocked Zoom slot is selected
-    const selectedFormat = document.querySelector('input[name="format"]:checked');
-    if (selectedFormat && selectedFormat.value === 'zoom' && !checkZoomAvailability()) {
-      alert('The selected Zoom time is not available. Please choose a different date or time.');
+    // Date must be chosen on the calendar for the selected format
+    const isZoom = fmt === 'zoom';
+    const cal = calendars[isZoom ? 0 : 1];
+    const dateVal = isZoom ? data.zoom_date : data.self_date;
+    const calBox = document.getElementById(isZoom ? 'cal-zoom' : 'cal-self');
+    if (!dateVal) {
+      cal.message('Please choose a date on the calendar.');
+      calBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return false;
     }
+    if (avail && (dateVal < avail.minDate || avail.unavailable.has(dateVal))) {
+      cal.message('That date is no longer available. Please choose another.');
+      calBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+    cal.message('');
 
     // UI: loading state
     const btn = document.getElementById('submit-btn');
@@ -1317,24 +1420,36 @@
     btn.textContent = 'Submitting…';
     errorBanner.classList.remove('active');
 
-    // POST to Google Apps Script
-    // Uses text/plain + no-cors to avoid CORS preflight; the script still receives and processes it fine
+    const resetBtn = () => { btn.disabled = false; btn.textContent = 'Submit intake form'; };
+
+    // POST to Google Apps Script. text/plain keeps it a simple request (no preflight);
+    // the script's JSON reply is readable after its redirect.
     fetch(SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(data),
-      mode: 'no-cors'
+      body: JSON.stringify(data)
     })
-    .then(() => {
-      // no-cors gives an opaque response — we can't read it, but if fetch resolves the request went through
-      form.style.display = 'none';
-      document.getElementById('success-card').classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    .then(r => r.json())
+    .then(res => {
+      if (res.status === 'success') {
+        form.style.display = 'none';
+        document.getElementById('success-card').classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (res.status === 'rejected') {
+        if (res.availability) applyAvailability(res.availability);
+        cal.message(res.message || 'That date is not available. Please choose another.');
+        calBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        resetBtn();
+        return;
+      }
+      throw new Error(res.message || 'Unexpected reply');
     })
-    .catch(() => {
+    .catch(err => {
+      console.error('submit failed', err);
       errorBanner.classList.add('active');
-      btn.disabled = false;
-      btn.textContent = 'Submit intake form';
+      resetBtn();
     });
 
     return false;

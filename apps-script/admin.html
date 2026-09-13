@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPR Bookings — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --base: #ebe9e2;
+    --base-deep: #e2dfd6;
+    --light: rgba(255, 255, 255, 0.95);
+    --dark: rgba(178, 172, 156, 0.55);
+    --text: #1f1d19;
+    --muted: #6b665c;
+    --gold: #8a6a25;
+    --gold-soft: #a07d2e;
+    --open: #3a6b4a;
+    --full: #b04040;
+    --blocked: #6b665c;
+    --r: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--base);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 28px 20px 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+
+  .raised { background: var(--base); border-radius: var(--r); box-shadow: -8px -8px 18px var(--light), 8px 8px 18px var(--dark); }
+  .inset  { background: var(--base); border-radius: 14px; box-shadow: inset -4px -4px 10px var(--light), inset 4px 4px 10px var(--dark); }
+
+  /* header */
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+  .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  h1 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 28px; line-height: 1.1; }
+  .who { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .chip { padding: 10px 16px; border-radius: 999px; font-size: 12px; color: var(--muted); }
+  .chip a { color: var(--gold); text-decoration: none; font-weight: 600; }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; align-items: start; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+  .card { padding: 24px; }
+
+  /* calendar */
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .month { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; }
+  .nbtn {
+    width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; color: var(--gold);
+    background: var(--base); font-size: 18px; display: grid; place-items: center;
+    box-shadow: -5px -5px 12px var(--light), 5px 5px 12px var(--dark); transition: box-shadow .15s, transform .15s;
+  }
+  .nbtn:hover { color: var(--gold-soft); }
+  .nbtn:active, .nbtn.pressed { box-shadow: inset -3px -3px 8px var(--light), inset 3px 3px 8px var(--dark); transform: translateY(1px); }
+  .nbtn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  .dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 10px; }
+  .dow span { text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+  .day {
+    position: relative; aspect-ratio: 1; min-height: 64px; border-radius: 14px; border: none; cursor: pointer;
+    background: var(--base); color: var(--text); font-family: inherit; text-align: left; padding: 8px 9px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: -5px -5px 12px var(--light), 5px 5px 12px var(--dark); transition: box-shadow .15s, transform .15s, opacity .15s;
+  }
+  .day:hover { transform: translateY(-1px); }
+  .day.selected, .day:active { box-shadow: inset -4px -4px 10px var(--light), inset 4px 4px 10px var(--dark); transform: none; }
+  .day:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .day.empty { visibility: hidden; }
+  .day.past { opacity: 0.45; }
+  .day.soon .num { color: var(--muted); }
+  .day.today .num::after { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); margin-left: 5px; vertical-align: middle; }
+  .num { font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .day.blocked .num { text-decoration: line-through; color: var(--blocked); }
+  .meta { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--open); flex-shrink: 0; }
+  .day.full .dot { background: var(--full); }
+  .day.full .meta { color: var(--full); font-weight: 600; }
+  .day.blocked .dot { background: var(--blocked); }
+  .day.hasnote::before { content: ''; position: absolute; top: 9px; right: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+  @media (max-width: 520px) { .days, .dow { gap: 6px; } .day { min-height: 54px; padding: 6px; border-radius: 10px; } .meta { font-size: 10px; } .num { font-size: 13px; } }
+
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 18px; font-size: 11px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  .skel .day { pointer-events: none; }
+  .skel .day .num, .skel .day .meta { visibility: hidden; }
+
+  /* panel */
+  .panel h2 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 20px; margin-bottom: 4px; }
+  .panel .sub { color: var(--muted); font-size: 12.5px; margin-bottom: 18px; }
+  .pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; box-shadow: inset -2px -2px 6px var(--light), inset 2px 2px 6px var(--dark); }
+  .pill.open { color: var(--open); } .pill.full { color: var(--full); } .pill.blocked { color: var(--blocked); }
+
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+  .lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
+  .lbl small { display: block; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  .stepper { display: inline-flex; align-items: center; gap: 8px; }
+  .stepper button {
+    width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer; background: var(--base); color: var(--gold);
+    font-size: 18px; font-weight: 600; box-shadow: -4px -4px 10px var(--light), 4px 4px 10px var(--dark);
+  }
+  .stepper button:active { box-shadow: inset -3px -3px 8px var(--light), inset 3px 3px 8px var(--dark); }
+  .stepper button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .stepper input {
+    width: 58px; height: 38px; text-align: center; border: none; font: 600 15px 'DM Sans', sans-serif; color: var(--text);
+    background: var(--base); border-radius: 12px; box-shadow: inset -3px -3px 8px var(--light), inset 3px 3px 8px var(--dark);
+    font-variant-numeric: tabular-nums;
+  }
+  .stepper input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+  .switch { position: relative; width: 58px; height: 32px; border-radius: 999px; border: none; cursor: pointer; background: var(--base); box-shadow: inset -3px -3px 8px var(--light), inset 3px 3px 8px var(--dark); transition: background .2s; }
+  .switch::after { content: ''; position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--base); box-shadow: -2px -2px 5px var(--light), 3px 3px 6px var(--dark); transition: left .2s; }
+  .switch[aria-checked="true"] { background: var(--gold); }
+  .switch[aria-checked="true"]::after { left: 30px; }
+  .switch:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  .field input[type="text"], .field input[type="number"] {
+    width: 100%; height: 42px; padding: 0 14px; border: none; border-radius: 12px; font: 14px 'DM Sans', sans-serif; color: var(--text);
+    background: var(--base); box-shadow: inset -3px -3px 8px var(--light), inset 3px 3px 8px var(--dark);
+  }
+  .field input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .field { margin-bottom: 18px; }
+  .field .lbl { display: block; margin-bottom: 8px; }
+
+  .btn {
+    width: 100%; height: 46px; border: none; border-radius: 14px; cursor: pointer; font: 600 12px 'DM Sans', sans-serif;
+    letter-spacing: 0.14em; text-transform: uppercase; color: #fff;
+    background: linear-gradient(145deg, var(--gold-soft), var(--gold));
+    box-shadow: -5px -5px 12px var(--light), 6px 6px 14px rgba(138, 106, 37, 0.35);
+    transition: transform .12s, box-shadow .12s, opacity .12s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(1px); box-shadow: -2px -2px 6px var(--light), 3px 3px 8px rgba(138, 106, 37, 0.3); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+  .btn:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+  .btn.ghost { color: var(--gold); background: var(--base); box-shadow: -5px -5px 12px var(--light), 5px 5px 12px var(--dark); }
+
+  .bookings { margin-top: 22px; }
+  .bookings h3 { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .bk { padding: 12px 14px; border-radius: 12px; margin-bottom: 10px; box-shadow: inset -3px -3px 8px var(--light), inset 3px 3px 8px var(--dark); }
+  .bk b { font-weight: 600; display: block; }
+  .bk span { color: var(--muted); font-size: 12px; }
+  .bk a { color: var(--gold); font-size: 12px; text-decoration: none; font-weight: 600; }
+  .empty { color: var(--muted); font-style: italic; font-family: 'Playfair Display', serif; font-size: 13px; }
+
+  .settings { margin-top: 28px; }
+  .settings h2 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 18px; margin-bottom: 14px; }
+  .settings .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 520px) { .settings .cols { grid-template-columns: 1fr; } }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+    padding: 12px 20px; border-radius: 999px; font-size: 13px; font-weight: 500; background: var(--base); color: var(--text);
+    box-shadow: -6px -6px 14px var(--light), 6px 6px 14px var(--dark); transition: opacity .2s, transform .2s; z-index: 10;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.err { color: var(--full); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <div class="eyebrow">Fellow Academy · SPR Bookings</div>
+      <h1>Booking calendar</h1>
+    </div>
+    <div class="who">
+      <span class="chip inset" id="who">Signed in</span>
+      <span class="chip inset"><a id="sheet-link" href="#" target="_blank" rel="noopener">Open sheet ↗</a></span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card raised">
+        <div class="cal-nav">
+          <button class="nbtn" id="prev" aria-label="Previous month">‹</button>
+          <div class="month" id="month">&nbsp;</div>
+          <button class="nbtn" id="next" aria-label="Next month">›</button>
+        </div>
+        <div class="dow"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        <div class="days skel" id="days"></div>
+        <div class="legend">
+          <span><i class="dot"></i> Open</span>
+          <span><i class="dot" style="background:var(--full)"></i> Full</span>
+          <span><i class="dot" style="background:var(--blocked)"></i> Blocked</span>
+          <span><i class="dot" style="background:var(--gold)"></i> Today / has note</span>
+        </div>
+      </div>
+
+      <div class="card raised settings">
+        <h2>Global rules</h2>
+        <div class="cols">
+          <div class="field"><label class="lbl" for="s-cap">Default capacity<small>bookings per day</small></label><input type="number" min="0" id="s-cap"></div>
+          <div class="field"><label class="lbl" for="s-lead">Lead days<small>earliest = today + this</small></label><input type="number" min="0" id="s-lead"></div>
+          <div class="field"><label class="lbl" for="s-win">Window days<small>how far ahead</small></label><input type="number" min="1" id="s-win"></div>
+        </div>
+        <button class="btn ghost" id="save-settings">Save rules</button>
+      </div>
+    </div>
+
+    <div class="card raised panel" id="panel">
+      <h2 id="p-date">Select a day</h2>
+      <div class="sub" id="p-sub">Click a date on the calendar to edit it.</div>
+      <div id="p-body" hidden>
+        <div class="row">
+          <div class="lbl">Capacity<small id="p-cap-hint"></small></div>
+          <div class="stepper">
+            <button type="button" id="cap-minus" aria-label="Decrease capacity">−</button>
+            <input type="text" inputmode="numeric" id="cap" aria-label="Capacity">
+            <button type="button" id="cap-plus" aria-label="Increase capacity">+</button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="lbl">Blocked<small>hide this date entirely</small></div>
+          <button type="button" class="switch" id="blocked" role="switch" aria-checked="false" aria-label="Blocked"></button>
+        </div>
+        <div class="field">
+          <label class="lbl" for="note">Note<small>internal, never shown to candidates</small></label>
+          <input type="text" id="note" maxlength="120" placeholder="e.g. Dr Shaun away">
+        </div>
+        <button class="btn" id="save">Save day</button>
+        <div class="bookings">
+          <h3 id="bk-title">Bookings</h3>
+          <div id="bk-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  var ADMIN_EMAIL = '<?= adminEmail ?>';
+  var state = { ym: '', data: null, selected: null, dirty: false, saving: false };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  document.getElementById('who').textContent = ADMIN_EMAIL;
+
+  // ── Server bridge (falls back to an in-memory mock when opened outside Apps Script) ──
+  var server = (typeof google !== 'undefined' && google.script) ? {
+    getMonth: function (ym) { return call('adminGetMonth', [ym]); },
+    setDate:  function (d, p) { return call('adminSetDate', [d, p]); },
+    setSettings: function (p) { return call('adminSetSettings', [p]); }
+  } : mockServer();
+
+  function call(fn, args) {
+    return new Promise(function (resolve, reject) {
+      var r = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+      r[fn].apply(r, args);
+    });
+  }
+
+  function mockServer() {
+    document.getElementById('who').textContent = 'Preview mode (no server)';
+    var today = new Date(); var t = ymd(today);
+    var settings = { default_capacity: 1, min_lead_days: 2, window_days: 120, timezone: 'Australia/Sydney' };
+    var overrides = {}; var booked = {}; booked[addDays(t, 3)] = 1; booked[addDays(t, 6)] = 2;
+    function month(ym) {
+      var p = ym.split('-').map(Number); var n = new Date(p[0], p[1], 0).getDate(); var days = [];
+      var minDate = addDays(t, settings.min_lead_days);
+      for (var i = 1; i <= n; i++) {
+        var d = ym + '-' + (i < 10 ? '0' : '') + i; var o = overrides[d] || {};
+        var cap = (o.capacity === '' || o.capacity == null) ? settings.default_capacity : Number(o.capacity);
+        var b = booked[d] || 0;
+        days.push({ date: d, booked: b, capacity: cap, blocked: !!o.blocked, note: o.note || '', tooSoon: d < minDate, past: d < t,
+          bookings: b ? [{ row: 2, name: 'Sample Candidate', email: 'sample@example.com', package: '4-Pack', format: 'Zoom', time: '11:00 AEST' }] : [] });
+      }
+      return { ym: ym, today: t, minDate: minDate, settings: settings, days: days, sheetUrl: '#', sheetId: 0 };
+    }
+    return {
+      getMonth: function (ym) { return new Promise(function (r) { setTimeout(function () { r(month(ym)); }, 400); }); },
+      setDate: function (d, p) { overrides[d] = p; return Promise.resolve(month(d.slice(0, 7))); },
+      setSettings: function (p) { Object.assign(settings, p); return Promise.resolve(settings); }
+    };
+  }
+
+  // ── Helpers ──
+  function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function addDays(s, n) { var p = s.split('-').map(Number); var d = new Date(Date.UTC(p[0], p[1] - 1, p[2] + n)); return d.toISOString().slice(0, 10); }
+  function shiftMonth(ym, n) { var p = ym.split('-').map(Number); var d = new Date(Date.UTC(p[0], p[1] - 1 + n, 1)); return d.toISOString().slice(0, 7); }
+  function longDate(s) { var p = s.split('-').map(Number); var d = new Date(Date.UTC(p[0], p[1] - 1, p[2])); return DAYS[d.getUTCDay()] + ' ' + p[2] + ' ' + MONTHS[p[1] - 1] + ' ' + p[0]; }
+  function stateOf(day) { return day.blocked ? 'blocked' : (day.booked >= day.capacity ? 'full' : 'open'); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  var toastTimer;
+  function toast(msg, isErr) {
+    var t = $('toast'); t.textContent = msg; t.className = 'toast show' + (isErr ? ' err' : '');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.className = 'toast'; }, 2600);
+  }
+
+  // ── Load and render ──
+  function load(ym, quiet) {
+    if (!quiet) $('days').classList.add('skel');
+    return server.getMonth(ym).then(function (data) {
+      if (data.ym !== state.ym) return;
+      state.data = data;
+      render();
+    }).catch(function (e) { toast('Could not load: ' + (e.message || e), true); });
+  }
+
+  function render() {
+    var data = state.data; if (!data) return;
+    var p = data.ym.split('-').map(Number);
+    $('month').textContent = MONTHS[p[1] - 1] + ' ' + p[0];
+    $('sheet-link').href = data.sheetUrl;
+    $('s-cap').value = data.settings.default_capacity;
+    $('s-lead').value = data.settings.min_lead_days;
+    $('s-win').value = data.settings.window_days;
+
+    var first = new Date(Date.UTC(p[0], p[1] - 1, 1)).getUTCDay();
+    var lead = (first + 6) % 7;
+    var html = '';
+    for (var i = 0; i < lead; i++) html += '<button class="day empty" tabindex="-1"></button>';
+    data.days.forEach(function (day) {
+      var st = stateOf(day);
+      var cls = ['day', st];
+      if (day.past) cls.push('past'); else if (day.tooSoon) cls.push('soon');
+      if (day.date === data.today) cls.push('today');
+      if (day.note) cls.push('hasnote');
+      if (day.date === state.selected) cls.push('selected');
+      html += '<button class="' + cls.join(' ') + '" data-date="' + day.date + '" aria-label="' + longDate(day.date) + ', ' + st + ', ' + day.booked + ' of ' + day.capacity + ' booked">' +
+        '<span class="num">' + Number(day.date.slice(8)) + '</span>' +
+        '<span class="meta"><i class="dot"></i>' + (day.blocked ? 'Blocked' : day.booked + '/' + day.capacity) + '</span></button>';
+    });
+    $('days').innerHTML = html;
+    $('days').classList.remove('skel');
+    if (state.selected && state.selected.slice(0, 7) === data.ym && !state.dirty) renderPanel();
+  }
+
+  function selectedDay() {
+    return state.data && state.data.days.filter(function (d) { return d.date === state.selected; })[0];
+  }
+
+  function renderPanel() {
+    var day = selectedDay(); if (!day) return;
+    var st = stateOf(day);
+    $('p-date').textContent = longDate(day.date);
+    $('p-sub').innerHTML = '<span class="pill ' + st + '">' + st + '</span>' + (day.past ? ' &nbsp;Past date' : day.tooSoon ? ' &nbsp;Inside lead time' : '');
+    $('p-body').hidden = false;
+    $('cap').value = day.capacity;
+    $('p-cap-hint').textContent = day.booked + ' booked · default ' + state.data.settings.default_capacity;
+    $('blocked').setAttribute('aria-checked', day.blocked ? 'true' : 'false');
+    $('note').value = day.note;
+    $('bk-title').textContent = 'Bookings (' + day.bookings.length + ')';
+    $('bk-list').innerHTML = day.bookings.length ? day.bookings.map(function (b) {
+      var link = state.data.sheetUrl + '#gid=' + state.data.sheetId + '&range=A' + b.row;
+      return '<div class="bk"><b>' + esc(b.name) + '</b><span>' + esc(b.package) + ' · ' + esc(b.format) + (b.time ? ' · ' + esc(b.time) : '') + '</span><br><a href="' + link + '" target="_blank" rel="noopener">Row ' + b.row + ' ↗</a></div>';
+    }).join('') : '<div class="empty">No bookings on this day.</div>';
+    state.dirty = false;
+  }
+
+  // ── Events ──
+  $('days').addEventListener('click', function (e) {
+    var btn = e.target.closest('.day'); if (!btn || btn.classList.contains('empty')) return;
+    if (state.dirty && !confirm('Discard unsaved changes to ' + longDate(state.selected) + '?')) return;
+    state.selected = btn.dataset.date; state.dirty = false;
+    render(); renderPanel();
+  });
+  $('prev').addEventListener('click', function () { state.ym = shiftMonth(state.ym, -1); load(state.ym); });
+  $('next').addEventListener('click', function () { state.ym = shiftMonth(state.ym, 1); load(state.ym); });
+
+  function markDirty() { state.dirty = true; }
+  $('cap').addEventListener('input', markDirty);
+  $('note').addEventListener('input', markDirty);
+  $('cap-minus').addEventListener('click', function () { $('cap').value = Math.max(0, (Number($('cap').value) || 0) - 1); markDirty(); });
+  $('cap-plus').addEventListener('click', function () { $('cap').value = (Number($('cap').value) || 0) + 1; markDirty(); });
+  $('blocked').addEventListener('click', function () {
+    var on = this.getAttribute('aria-checked') === 'true';
+    this.setAttribute('aria-checked', on ? 'false' : 'true'); markDirty();
+  });
+
+  $('save').addEventListener('click', function () {
+    if (!state.selected || state.saving) return;
+    var cap = $('cap').value.trim();
+    if (cap !== '' && (!/^\d+$/.test(cap))) { toast('Capacity must be a whole number', true); return; }
+    var patch = { capacity: cap === '' ? '' : Number(cap), blocked: $('blocked').getAttribute('aria-checked') === 'true', note: $('note').value.trim() };
+    setSaving(true);
+    server.setDate(state.selected, patch).then(function (data) {
+      state.data = data; state.dirty = false; render(); renderPanel();
+      toast('Saved ' + longDate(state.selected));
+    }).catch(function (e) { toast('Save failed: ' + (e.message || e), true); }).then(function () { setSaving(false); });
+  });
+
+  $('save-settings').addEventListener('click', function () {
+    var patch = { default_capacity: Number($('s-cap').value), min_lead_days: Number($('s-lead').value), window_days: Number($('s-win').value) };
+    if ([patch.default_capacity, patch.min_lead_days, patch.window_days].some(function (n) { return !isFinite(n) || n < 0; })) { toast('Rules must be whole numbers', true); return; }
+    this.disabled = true; var btn = this;
+    server.setSettings(patch).then(function () { toast('Rules saved'); return load(state.ym, true); })
+      .catch(function (e) { toast('Save failed: ' + (e.message || e), true); }).then(function () { btn.disabled = false; });
+  });
+
+  function setSaving(on) { state.saving = on; $('save').disabled = on; $('save').textContent = on ? 'Saving…' : 'Save day'; }
+
+  window.addEventListener('beforeunload', function (e) { if (state.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  // ── Boot + 30 s poll ──
+  state.ym = ymd(new Date()).slice(0, 7);
+  load(state.ym);
+  setInterval(function () { if (!state.saving && document.visibilityState === 'visible') load(state.ym, true); }, 30000);
+</script>
+</body>
+</html>
