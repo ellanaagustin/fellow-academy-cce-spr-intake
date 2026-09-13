@@ -70,7 +70,8 @@
     box-shadow: -5px -5px 12px var(--light), 5px 5px 12px var(--dark); transition: box-shadow .15s, transform .15s, opacity .15s;
   }
   .day:hover { transform: translateY(-1px); }
-  .day.selected, .day:active { box-shadow: inset -4px -4px 10px var(--light), inset 4px 4px 10px var(--dark); transform: none; }
+  .day.selected, .day.inrange, .day:active { box-shadow: inset -4px -4px 10px var(--light), inset 4px 4px 10px var(--dark); transform: none; }
+  .day.inrange::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 2px var(--gold); opacity: .45; pointer-events: none; }
   .day:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .day.empty { visibility: hidden; }
   .day.past { opacity: 0.45; }
@@ -225,6 +226,7 @@
           <span><i class="dot" style="background:var(--full)"></i> Full</span>
           <span><i class="dot" style="background:var(--blocked)"></i> Blocked</span>
           <span><i class="dot" style="background:var(--gold)"></i> Today / has note</span>
+          <span style="margin-left:auto">Shift-click a second day to edit a range</span>
         </div>
       </div>
 
@@ -279,7 +281,19 @@
 
 <script>
   var ADMIN_EMAIL = '<?= adminEmail ?>';
-  var state = { ym: '', data: null, selected: null, dirty: false, saving: false };
+  var state = { ym: '', data: null, selected: null, rangeEnd: null, dirty: false, saving: false };
+  function rangeOf() {
+    if (!state.selected || !state.rangeEnd) return null;
+    return state.selected < state.rangeEnd ? [state.selected, state.rangeEnd] : [state.rangeEnd, state.selected];
+  }
+  function rangeDays() {
+    var r = rangeOf(); if (!r || !state.data) return [];
+    return state.data.days.filter(function (d) { return d.date >= r[0] && d.date <= r[1]; });
+  }
+  function selectionLabel() {
+    var r = rangeOf();
+    return r ? longDate(r[0]) + ' – ' + longDate(r[1]) : longDate(state.selected);
+  }
 
   var $ = function (id) { return document.getElementById(id); };
   var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -291,6 +305,7 @@
   var server = (typeof google !== 'undefined' && google.script) ? {
     getMonth: function (ym) { return call('adminGetMonth', [ym]); },
     setDate:  function (d, p) { return call('adminSetDate', [d, p]); },
+    setRange: function (a, b, p) { return call('adminSetRange', [a, b, p]); },
     setSettings: function (p) { return call('adminSetSettings', [p]); }
   } : mockServer();
 
@@ -321,6 +336,10 @@
     return {
       getMonth: function (ym) { return new Promise(function (r) { setTimeout(function () { r(month(ym)); }, 400); }); },
       setDate: function (d, p) { overrides[d] = p; return Promise.resolve(month(d.slice(0, 7))); },
+      setRange: function (a, b, p) {
+        for (var d = a; d <= b; d = addDays(d, 1)) overrides[d] = { capacity: p.capacity === '' ? (overrides[d] || {}).capacity : p.capacity, blocked: p.blocked, note: p.note };
+        return Promise.resolve(month(a.slice(0, 7)));
+      },
       setSettings: function (p) { Object.assign(settings, p); return Promise.resolve(settings); }
     };
   }
@@ -361,6 +380,7 @@
 
     var first = new Date(Date.UTC(p[0], p[1] - 1, 1)).getUTCDay();
     var lead = (first + 6) % 7;
+    var r = rangeOf();
     var html = '';
     for (var i = 0; i < lead; i++) html += '<button class="day empty" tabindex="-1"></button>';
     data.days.forEach(function (day) {
@@ -370,6 +390,7 @@
       if (day.date === data.today) cls.push('today');
       if (day.note) cls.push('hasnote');
       if (day.date === state.selected) cls.push('selected');
+      else if (r && day.date >= r[0] && day.date <= r[1]) cls.push('inrange');
       html += '<button class="' + cls.join(' ') + '" data-date="' + day.date + '" aria-label="' + longDate(day.date) + ', ' + st + ', ' + day.booked + ' of ' + day.capacity + ' booked">' +
         '<span class="num">' + Number(day.date.slice(8)) + '</span>' +
         '<span class="meta"><i class="dot"></i>' + (day.blocked ? 'Blocked' : day.booked + '/' + day.capacity) + '</span></button>';
@@ -385,11 +406,12 @@
 
   function renderPanel() {
     var day = selectedDay(); if (!day) return;
+    if (rangeOf()) return renderRangePanel();
     var st = stateOf(day);
     $('p-date').textContent = longDate(day.date);
     $('p-sub').innerHTML = '<span class="pill ' + st + '">' + st + '</span>' + (day.past ? ' &nbsp;Past date' : day.tooSoon ? ' &nbsp;Inside lead time' : '');
     $('p-body').hidden = false;
-    $('cap').value = day.capacity;
+    $('cap').value = day.capacity; $('cap').placeholder = '';
     $('p-cap-hint').textContent = day.booked + ' booked · default ' + state.data.settings.default_capacity;
     $('blocked').setAttribute('aria-checked', day.blocked ? 'true' : 'false');
     $('note').value = day.note;
@@ -401,11 +423,35 @@
     state.dirty = false;
   }
 
+  function renderRangePanel() {
+    var days = rangeDays(); if (!days.length) return;
+    var r = rangeOf();
+    var booked = days.reduce(function (n, d) { return n + d.bookings.length; }, 0);
+    var blockedCount = days.filter(function (d) { return d.blocked; }).length;
+    $('p-date').textContent = longDate(r[0]) + ' – ' + longDate(r[1]);
+    $('p-sub').innerHTML = '<span class="pill ' + (blockedCount === days.length ? 'blocked' : 'open') + '">Range</span> &nbsp;' + days.length + ' days · ' + booked + ' booked · ' + blockedCount + ' blocked';
+    $('p-body').hidden = false;
+    $('cap').value = ''; $('cap').placeholder = 'keep';
+    $('p-cap-hint').textContent = 'blank keeps each day · default ' + state.data.settings.default_capacity;
+    $('blocked').setAttribute('aria-checked', blockedCount === days.length ? 'true' : 'false');
+    $('note').value = '';
+    $('bk-title').textContent = 'Bookings in range (' + booked + ')';
+    $('bk-list').innerHTML = booked ? days.map(function (d) {
+      return d.bookings.map(function (b) {
+        var link = state.data.sheetUrl + '#gid=' + state.data.sheetId + '&range=A' + b.row;
+        return '<div class="bk"><b>' + esc(b.name) + '</b><span>' + longDate(d.date) + ' · ' + esc(b.format) + (b.time ? ' · ' + esc(b.time) : '') + '</span><br><a href="' + link + '" target="_blank" rel="noopener">Row ' + b.row + ' ↗</a></div>';
+      }).join('');
+    }).join('') : '<div class="empty">No bookings in this range.</div>';
+    state.dirty = false;
+  }
+
   // ── Events ──
   $('days').addEventListener('click', function (e) {
     var btn = e.target.closest('.day'); if (!btn || btn.classList.contains('empty')) return;
-    if (state.dirty && !confirm('Discard unsaved changes to ' + longDate(state.selected) + '?')) return;
-    state.selected = btn.dataset.date; state.dirty = false;
+    if (state.dirty && !confirm('Discard unsaved changes to ' + selectionLabel() + '?')) return;
+    if (e.shiftKey && state.selected && state.selected !== btn.dataset.date) state.rangeEnd = btn.dataset.date;
+    else { state.selected = btn.dataset.date; state.rangeEnd = null; }
+    state.dirty = false;
     render(); renderPanel(); openPanel(true);
   });
 
@@ -418,8 +464,8 @@
   }
   $('panel-tab').addEventListener('click', function () { openPanel(!$('panel').classList.contains('open')); });
   function closePanel() {
-    if (state.dirty && !confirm('Discard unsaved changes to ' + longDate(state.selected) + '?')) return;
-    state.selected = null; state.dirty = false;
+    if (state.dirty && !confirm('Discard unsaved changes to ' + selectionLabel() + '?')) return;
+    state.selected = null; state.rangeEnd = null; state.dirty = false;
     openPanel(false); render();
   }
   $('panel-close').addEventListener('click', closePanel);
@@ -443,10 +489,16 @@
     var cap = $('cap').value.trim();
     if (cap !== '' && (!/^\d+$/.test(cap))) { toast('Capacity must be a whole number', true); return; }
     var patch = { capacity: cap === '' ? '' : Number(cap), blocked: $('blocked').getAttribute('aria-checked') === 'true', note: $('note').value.trim() };
+    var r = rangeOf();
+    if (r && patch.blocked) {
+      var booked = rangeDays().reduce(function (n, d) { return n + d.bookings.length; }, 0);
+      if (booked && !confirm(booked + ' booking' + (booked > 1 ? 's' : '') + ' already sit inside this range. Block it anyway?')) return;
+    }
     setSaving(true);
-    server.setDate(state.selected, patch).then(function (data) {
+    var req = r ? server.setRange(r[0], r[1], patch) : server.setDate(state.selected, patch);
+    req.then(function (data) {
       state.data = data; state.dirty = false; render(); renderPanel();
-      toast('Saved ' + longDate(state.selected));
+      toast('Saved ' + (r ? rangeDays().length + ' days' : longDate(state.selected)));
     }).catch(function (e) { toast('Save failed: ' + (e.message || e), true); }).then(function () { setSaving(false); });
   });
 

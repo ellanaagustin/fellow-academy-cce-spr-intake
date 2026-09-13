@@ -304,6 +304,41 @@ function adminSetDate(date, patch) {
   return adminGetMonth(date.slice(0, 7));
 }
 
+// Applies blocked + note to every day from..to inclusive. capacity '' keeps each day's existing value.
+function adminSetRange(from, to, patch) {
+  requireAdmin();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to) || from > to) throw new Error('Bad range');
+  var dates = [];
+  for (var d = from; d <= to && dates.length <= 62; d = addDays(d, 1)) dates.push(d);
+  if (dates.length > 62) throw new Error('Range too long (max 62 days)');
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    ensureSheets(ss);
+    var sheet = ss.getSheetByName(DATES_SHEET);
+    var overrides = readOverrides(ss);
+    var setCap = !(patch.capacity === '' || patch.capacity == null);
+    var blocked = !!patch.blocked, note = String(patch.note || '');
+    var appendRows = [];
+    dates.forEach(function (date) {
+      var existing = overrides[date];
+      var capacity = setCap ? Number(patch.capacity) : (existing ? existing.capacity : '');
+      var values = [date, capacity, blocked, note];
+      if (existing) sheet.getRange(existing.row, 1, 1, 4).setValues([values]);
+      else appendRows.push(values);
+    });
+    if (appendRows.length) {
+      var start = sheet.getLastRow() + 1;
+      sheet.getRange(start, 1, appendRows.length, 1).setNumberFormat('@');
+      sheet.getRange(start, 1, appendRows.length, 4).setValues(appendRows);
+    }
+  } finally {
+    lock.releaseLock();
+  }
+  return adminGetMonth(from.slice(0, 7));
+}
+
 function adminSetSettings(patch) {
   requireAdmin();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
