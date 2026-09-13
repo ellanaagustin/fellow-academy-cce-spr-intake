@@ -12,7 +12,7 @@ Branch: `feature/date-rules` (not pushed). Spec and progress log: `SPEC.md`.
 | Phase 1: Settings/Dates tabs + GET availability | Done, deployed dev @3 | curl GET returns `{today,minDate,maxDate,unavailable[]}` matching real bookings |
 | Phase 2: POST validation under lock | Done, deployed dev @3 | too_soon / full / missing_date rejected; success then full on same date |
 | Phase 3: candidate calendar + reads reply | Coded, not browser-verified | Node syntax check passes; awaiting Jeraisy's browser check |
-| Phase 4: admin page (neumorphic, white) | Coded, deployed dev @5 | Awaiting Jeraisy's confirmation it opens for jeraisy.swnco@gmail.com |
+| Phase 4: admin page (neumorphic, white) | Done, deployed dev @6 | Opens for jeraisy.swnco@gmail.com; calendar, day panel and bookings render (screenshot 16:20) |
 | Blocked-date path | Unit-tested only | `tests/rules.test.js`; no live Dates row yet |
 | Phase 5: prod rollout | Not started | — |
 
@@ -23,7 +23,7 @@ Branch: `feature/date-rules` (not pushed). Spec and progress log: `SPEC.md`.
 
 ## Next actions
 1. Jeraisy: open `index.html` from disk, confirm calendars load with 15/16/17/19/20 Sep greyed, submit a test on an open day. Blocked on Jeraisy.
-2. Jeraisy: open admin URL (`apps-script/deploy.sh` ADMIN_ID + `?page=admin`), block one day, confirm candidate page hides it. Blocked on Jeraisy.
+2. Jeraisy: in the admin page, block one day and save, then reload the candidate page and confirm it is greyed. Blocked on Jeraisy.
 3. Claude: fix anything from 1–2, then `git push -u origin feature/date-rules` when Jeraisy says push.
 4. Prod rollout in SPEC.md order: paste `Code.gs` + `admin.html` into prod script, New version on existing deployment, add admin deployment (domain-restricted), then merge to main.
 
