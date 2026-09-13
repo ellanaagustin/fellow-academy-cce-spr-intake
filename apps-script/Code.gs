@@ -18,8 +18,8 @@
 var NOTIFICATION_EMAIL = 'agustin.ellanamickaela@gmail.com, support@fellowacademy.com.au';
 var ADMIN_EMAILS = [
   'support@fellowacademy.com.au',
-  'agustin.ellanamickaela@gmail.com'
-  // add the dev account here when testing the admin page on the dev sheet
+  'agustin.ellanamickaela@gmail.com',
+  'jeraisy.swnco@gmail.com'
 ];
 var SHEET_NAME     = 'SPR Intakes';
 var SETTINGS_SHEET = 'Settings';
