@@ -1,6 +1,6 @@
-# Savepoint 2026-09-13 21:30 (Asia/Manila)
+# Savepoint 2026-09-13 22:35 (Asia/Manila)
 
-Branch: `main` (feature/date-rules merged fast-forward and pushed). Spec and progress log: `SPEC.md`. Last commit 73c46dc.
+Branch: `main` (feature/date-rules merged fast-forward and pushed). Spec and progress log: `SPEC.md`. Last commit 7e56ce4.
 Live site: https://fellow-academy-cce-spr-intake.netlify.app (Netlify deploys main).
 
 ## Production stack (moved 2026-09-13 ~21:10 Manila)
@@ -10,7 +10,7 @@ Live site: https://fellow-academy-cce-spr-intake.netlify.app (Netlify deploys ma
 | Prod sheet | "SPR Intakes", owner support@fellowacademy.com.au, id `1WOCgd-xi1RUGHu8JhexLzaMFzqeatNowLA3rpmkffJs`; editors jeraisy.swnco@gmail.com, agustin.ellanamickaela@gmail.com |
 | Prod script (bound) | `1I3mi_pchiipFW0EX8CgAOay_ZqoEjNGXd40uREJ8t1XAWMJud594tgcR` (`.clasp.prod.json`, clasp profile `prod` = support@) |
 | Form deployment (live, in index.html) | `AKfycbxBcdRp88zDFCBap3UxxYnyQJXi8rigtRupDZrkFZcWQFBEL2olUwn1VFSOl43Q7fO-8Q` @3, execute as owner, anyone anonymous |
-| Admin deployment | `AKfycbwzDS_QVs4IJgTFG7K8r44vr3qAErcC_isXWEtL0_v12keHS8v05PTjlTap_GcjUtDv1g` @2, execute as user accessing, anyone (ADMIN_EMAILS gates) → `…/exec?page=admin` |
+| Admin deployment | `AKfycbwzDS_QVs4IJgTFG7K8r44vr3qAErcC_isXWEtL0_v12keHS8v05PTjlTap_GcjUtDv1g` @8, execute as user accessing, anyone (ADMIN_EMAILS gates) → `…/exec?page=admin` |
 | Dev (former prod) | Sheet "SPR Intakes" owned by jeraisy.swnco@gmail.com, script `1jz9VT…` (`.clasp.json`), deployments in deploy.sh `dev` case |
 | Old original prod | "SPR Intakes Backend" (support@), original script untouched; superseded |
 
@@ -20,7 +20,8 @@ Live site: https://fellow-academy-cce-spr-intake.netlify.app (Netlify deploys ma
 |---|---|---|
 | Date rules (lead 2, capacity, blocked, override) | Live | Live endpoint returns `{today,minDate,maxDate,unavailable[]}`; 19/19 rule tests |
 | Candidate page (minimalist, brand fonts, branded pickers) | Live | Netlify serves page with new form URL (checked 21:16); headless Chrome verified greyed days before the move |
-| Admin page: calendar, drawer, range block, move booking + email, search, names on days | Live @2 | support@ opened it and saw blocked dates; move flow verified in preview and on dev with real email |
+| Admin page: calendar, drawer, range block, move booking + email, search, names + format glyphs on days, push-aside drawer, equal columns | Live @8 | support@, Jeraisy and Ellana all opened it; move flow verified on dev with real email; preview screenshots at 1600px |
+| Live form end-to-end test | Done 22:20 | Headless Chrome submitted self-record 2026-09-22 on the Netlify site: success card, row in sheet, date now unavailable. Test row still to delete |
 | Emails from support@ | Live | Form deployment runs as support@; move emails sent by whoever moves, From support@ only if that account has the alias |
 | Old→new data | Copy taken 21:03 | Submissions on Jeraisy's sheet after 21:03 must be pasted across by hand |
 
@@ -29,7 +30,7 @@ Live site: https://fellow-academy-cce-spr-intake.netlify.app (Netlify deploys ma
 - No `.env`. Script exec URLs are public by design (index.html, deploy.sh).
 
 ## Next actions
-1. Jeraisy and Ellana: open the new admin URL once from their Gmail accounts and accept the consent (unverified-app step). Blocked on them.
+1. Jeraisy: delete the row "TEST SUBMISSION - delete me" (2026-09-22) from the prod sheet; the date shows full until then. Blocked on Jeraisy.
 2. Jeraisy: compare the old sheet (own Drive) with the new one for rows after 21:03 Manila and paste any across; rename the old sheet "OLD". Blocked on Jeraisy.
 3. Routine: `bash apps-script/deploy.sh prod all` after any Code.gs/admin.html change; push main for index.html changes.
 
@@ -44,6 +45,9 @@ curl -sS -L "https://script.google.com/macros/s/AKfycbxBcdRp88zDFCBap3UxxYnyQJXi
 Headless check of the candidate page: serve the repo on localhost (`node <scratchpad>/serve.js .`), drive Chrome over CDP to click a format radio, then read `.cal-day` classes. Admin preview mode (no server) at `/apps-script/admin.html` exercises the client with a mock.
 
 ## Gotchas
+- Multi-account browsers: script web apps run as the browser's default account. Workspace users should use `https://script.google.com/a/macros/fellowacademy.com.au/s/<id>/exec?page=admin`; Gmail admins use a single-account profile or incognito.
+- CSS grid `repeat(7, 1fr)` lets long non-wrapping content widen a column; use `minmax(0, 1fr)` and `min-width: 0` on tiles.
+- SVG glyphs in a flex line need `align-items: center`; baseline alignment floats them.
 - `clasp create --type sheets --parentId X` ignores X and creates a new spreadsheet; use `--parentId` alone to bind to an existing sheet.
 - An execute-as-owner deployment answers 403 then 404 ("page not found") until the owner has consented in a browser and the deployment is republished afterwards.
 - When manifest scopes change, existing users are not re-prompted reliably; remove the app at myaccount.google.com/permissions and reopen the page.
