@@ -1,21 +1,28 @@
 #!/usr/bin/env bash
 # Push apps-script/ to the linked Apps Script project and republish deployments.
-#   ./apps-script/deploy.sh public     # candidate endpoint (execute as owner, anyone) — the LIVE form endpoint in index.html
-#   ./apps-script/deploy.sh admin      # admin page (execute as user accessing, any signed-in Google account, ADMIN_EMAILS gates)
-#   ./apps-script/deploy.sh all
-# One script project, bound to the "SPR Intakes" sheet owned by jeraisy.swnco@gmail.com; it is production (decided 2026-09-13).
-# clasp is logged in as that account. Apps Script keeps web-app settings inside the manifest of each version,
-# so the manifest is rewritten before every deploy to match the target.
+#   ./apps-script/deploy.sh prod public   # LIVE candidate endpoint (execute as owner support@, anyone) — URL lives in index.html
+#   ./apps-script/deploy.sh prod admin    # admin page (execute as user accessing, any signed-in Google account, ADMIN_EMAILS gates)
+#   ./apps-script/deploy.sh prod all
+#   ./apps-script/deploy.sh dev all       # the former project on Jeraisy's sheet, kept for experiments
+# Apps Script keeps web-app settings inside the manifest of each version, so the manifest
+# is rewritten before every deploy to match the target.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-TARGET="${1:-all}"
-[[ "$TARGET" == "dev" || "$TARGET" == "prod" ]] && TARGET="${2:-all}"   # tolerate the old "dev all" form
-
-CLASP="clasp"
-PUBLIC_ID="AKfycbxG6X95p5DFTCsd2so5dQj-8h-2jWtZikgklTsazisHQlcN7VzET9_woJI3sEqC3Lz3"
-ADMIN_ID="AKfycbx9pxbXowdjzCqkfo-t1F-16cbxL6D3Kj-zOinIKgMybPdmeRcDg2OCvRC-CTjZ_Wn3"
+ENV="${1:-prod}"; TARGET="${2:-all}"
 ADMIN_ACCESS="ANYONE"   # MYSELF blocks every non-owner account before doGet; ADMIN_EMAILS is the gate
+
+case "$ENV" in
+  prod)   # script bound to "SPR Intakes" owned by support@fellowacademy.com.au; clasp profile "prod" (clasp login --user prod)
+    CLASP="clasp --user prod -P .clasp.prod.json"
+    PUBLIC_ID="AKfycbxBcdRp88zDFCBap3UxxYnyQJXi8rigtRupDZrkFZcWQFBEL2olUwn1VFSOl43Q7fO-8Q"   # LIVE form endpoint (index.html SCRIPT_URL_PROD)
+    ADMIN_ID="AKfycbwzDS_QVs4IJgTFG7K8r44vr3qAErcC_isXWEtL0_v12keHS8v05PTjlTap_GcjUtDv1g" ;;
+  dev)    # former project bound to the sheet owned by jeraisy.swnco@gmail.com; default clasp profile
+    CLASP="clasp"
+    PUBLIC_ID="AKfycbxG6X95p5DFTCsd2so5dQj-8h-2jWtZikgklTsazisHQlcN7VzET9_woJI3sEqC3Lz3"
+    ADMIN_ID="AKfycbx9pxbXowdjzCqkfo-t1F-16cbxL6D3Kj-zOinIKgMybPdmeRcDg2OCvRC-CTjZ_Wn3" ;;
+  *) echo "unknown env $ENV"; exit 1 ;;
+esac
 
 manifest() {
   cat > apps-script/appsscript.json <<EOF

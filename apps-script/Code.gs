@@ -235,6 +235,31 @@ function serveAdmin() {
   return t.evaluate().setTitle('SPR Bookings — Admin').addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
+// Every booking with a date, oldest first. Feeds the admin search box.
+function adminAllBookings() {
+  requireAdmin();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) return [];
+  var tz = ss.getSpreadsheetTimeZone();
+  var rows = sheet.getDataRange().getValues();
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    var d = rowBookingDate(rows[i], tz);
+    if (!d) continue;
+    var isZoom = String(rows[i][COL.FORMAT]).toLowerCase().indexOf('zoom') !== -1;
+    out.push({
+      row: i + 1, date: d,
+      name: String(rows[i][COL.NAME]), email: String(rows[i][COL.EMAIL]),
+      package: String(rows[i][COL.PACKAGE]).replace(/\s*\(\$\d+\)/, ''),
+      format: isZoom ? 'Zoom' : 'Self-record',
+      time: isZoom ? (toTimeStr(rows[i][COL.ZOOM_TIME], tz) + ' ' + String(rows[i][COL.ZOOM_TZ]).toUpperCase()).trim() : ''
+    });
+  }
+  out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.row - b.row; });
+  return out;
+}
+
 // ym = 'yyyy-MM'
 function adminGetMonth(ym) {
   requireAdmin();

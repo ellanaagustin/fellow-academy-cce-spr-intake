@@ -803,9 +803,9 @@
   //  CONFIGURATION — paste your Google Apps Script URL here
   //  after you deploy it (see google_apps_script.js for setup)
   // ══════════════════════════════════════════════════════
-  // Both point at the script bound to the "SPR Intakes" sheet (decided 2026-09-13: that sheet is production).
-  var SCRIPT_URL_PROD = 'https://script.google.com/macros/s/AKfycbxG6X95p5DFTCsd2so5dQj-8h-2jWtZikgklTsazisHQlcN7VzET9_woJI3sEqC3Lz3/exec';
-  var SCRIPT_URL_DEV  = SCRIPT_URL_PROD;
+  // Prod: script bound to "SPR Intakes" owned by support@fellowacademy.com.au (moved 2026-09-13). Dev: the former project on Jeraisy's sheet.
+  var SCRIPT_URL_PROD = 'https://script.google.com/macros/s/AKfycbxBcdRp88zDFCBap3UxxYnyQJXi8rigtRupDZrkFZcWQFBEL2olUwn1VFSOl43Q7fO-8Q/exec';
+  var SCRIPT_URL_DEV  = 'https://script.google.com/macros/s/AKfycbxG6X95p5DFTCsd2so5dQj-8h-2jWtZikgklTsazisHQlcN7VzET9_woJI3sEqC3Lz3/exec';
   var IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(location.hostname) || new URLSearchParams(location.search).get('env') === 'dev';
   var SCRIPT_URL = IS_LOCAL ? SCRIPT_URL_DEV : SCRIPT_URL_PROD;
 
