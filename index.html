@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fellow Academy — CCE SPR Intake Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf6;
+    --bg-card: #ffffff;
+    --bg-card-elevated: #fdfcf7;
+    --bg-section: #f3f1ea;
+    --text: #1a1a1a;
+    --text-muted: #4a463f;
+    --text-faint: #6e6a62;
+    --gold: #8a6a25;
+    --gold-soft: #a07d2e;
+    --gold-bg: rgba(138, 106, 37, 0.10);
+    --rule: #e0ddd3;
+    --rule-strong: #c4c0b3;
+    --focus: #a07d2e;
+    --error: #b04040;
+    --success: #3a5443;
+    --warning-bg: #fdf7e8;
+    --warning-border: #d9b85a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    padding: 56px 24px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .wrap { max-width: 820px; margin: 0 auto; }
+
+  /* ─── Header ─── */
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 14px;
+  }
+
+  .lede {
+    font-size: 15.5px;
+    color: var(--text-muted);
+    max-width: 680px;
+    margin-bottom: 48px;
+    line-height: 1.65;
+  }
+
+  .lede strong { color: var(--text); font-weight: 600; }
+
+  /* ─── Section ─── */
+  .section {
+    background: var(--bg-card);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 36px 40px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 2px rgba(26, 26, 26, 0.03);
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 6px;
+  }
+
+  .section-num {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .section-sub {
+    font-size: 13.5px;
+    color: var(--text-faint);
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 24px;
+  }
+
+  /* ─── Form fields ─── */
+  .field-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 22px;
+    margin-top: 4px;
+  }
+
+  .field-group.single { grid-template-columns: 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 7px;
+  }
+
+  label .req {
+    color: var(--gold);
+  }
+
+  label .hint {
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    font-style: italic;
+    color: var(--text-faint);
+    font-family: 'Playfair Display', serif;
+    font-size: 12px;
+    margin-left: 8px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    background: var(--bg);
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    color: var(--text);
+    line-height: 1.5;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="tel"]:focus,
+  input[type="date"]:focus,
+  input[type="time"]:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--focus);
+    background: var(--bg-card);
+  }
+
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a6a25' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+    padding-right: 40px;
+  }
+
+  /* ─── Radio option rows ─── */
+  .option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--bg-card-elevated);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .option:hover {
+    border-color: var(--rule-strong);
+    background: var(--bg);
+  }
+
+  .option.selected {
+    border-color: var(--gold-soft);
+    background: var(--gold-bg);
+  }
+
+  .option input[type="radio"],
+  .option input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--gold);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .option-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .option-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+
+  .option-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--gold);
+    margin-left: 8px;
+  }
+
+  .option-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ─── Progressive-disclosure panels ─── */
+  .reveal {
+    display: none;
+    margin-top: 20px;
+    padding: 24px 24px;
+    background: var(--bg-section);
+    border-radius: 3px;
+    border-left: 3px solid var(--gold-soft);
+  }
+
+  .reveal.active { display: block; }
+
+  .reveal-head {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .reveal h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .reveal p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 10px;
+  }
+
+  .reveal p strong { color: var(--text); font-weight: 600; }
+  .reveal p:last-child { margin-bottom: 0; }
+
+  .reveal .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .reveal .field { display: flex; flex-direction: column; }
+
+  /* ─── Station selector ─── */
+  .selector-helper {
+    background: var(--gold-bg);
+    padding: 14px 18px;
+    border-radius: 3px;
+    font-size: 13.5px;
+    color: var(--text);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .selector-helper .icon {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--gold);
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .selector-helper strong { color: var(--gold); font-weight: 600; }
+
+  .station-group {
+    margin-bottom: 22px;
+  }
+
+  .station-group:last-child { margin-bottom: 0; }
+
+  .station-group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .station-group-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .station-counter {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .station-counter.complete { color: var(--success); }
+  .station-counter.over { color: var(--error); }
+
+  .station-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .station-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-card-elevated);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    font-size: 13.5px;
+    color: var(--text);
+  }
+
+  .station-option:hover {
+    border-color: var(--rule-strong);
+    background: var(--bg);
+  }
+
+  .station-option.selected {
+    border-color: var(--gold-soft);
+    background: var(--gold-bg);
+  }
+
+  .station-option input[type="checkbox"] {
+    accent-color: var(--gold);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .station-option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* ─── Attestation checkboxes ─── */
+  .attest-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.55;
+    cursor: pointer;
+  }
+
+  .attest-item:last-child { border-bottom: none; }
+
+  .attest-item input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--gold);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .attest-item strong { font-weight: 600; }
+
+  /* ─── Submit ─── */
+  .submit-section {
+    background: var(--bg-card);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 36px 40px;
+    text-align: center;
+    box-shadow: 0 1px 2px rgba(26, 26, 26, 0.03);
+    margin-top: 20px;
+  }
+
+  .submit-section p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  button[type="submit"] {
+    background: var(--gold);
+    color: white;
+    border: none;
+    padding: 14px 44px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s ease, opacity 0.15s ease;
+  }
+
+  button[type="submit"]:hover { background: var(--gold-soft); }
+  button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* ─── Error banner ─── */
+  .error-banner {
+    display: none;
+    background: #fdf0f0;
+    border: 1px solid #c97070;
+    border-radius: 3px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    color: var(--error);
+    margin-bottom: 16px;
+    line-height: 1.55;
+  }
+  .error-banner.active { display: block; }
+
+  /* ─── Footer ─── */
+  .footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* ─── Success overlay ─── */
+  .success-card {
+    display: none;
+    background: var(--bg-card);
+    border: 1px solid var(--gold-soft);
+    border-radius: 4px;
+    padding: 48px 40px;
+    text-align: center;
+    box-shadow: 0 1px 2px rgba(26, 26, 26, 0.03);
+    margin-top: 20px;
+  }
+
+  .success-card.active { display: block; }
+
+  .success-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .success-card p {
+    font-size: 14.5px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto 12px;
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 720px) {
+    body { padding: 32px 16px; }
+    .section { padding: 24px 22px; }
+    .submit-section { padding: 28px 22px; }
+    h1 { font-size: 28px; }
+    .field-group { grid-template-columns: 1fr; gap: 16px; }
+    .reveal .fields { grid-template-columns: 1fr; }
+    .station-grid { grid-template-columns: 1fr; }
+    .reveal { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Fellow Academy · CCE Station Performance Review</div>
+  <h1>Your Station Performance Review Intake Form</h1>
+  <p class="lede">Thanks for your interest in Fellow Academy's CCE Station Performance Review. Please complete this form so we can prepare your cases and schedule your session. Takes around <strong>three minutes</strong>.</p>
+
+  <form id="spr-form" onsubmit="handleSubmit(event)">
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 01 · About you                          -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num">01</span>
+        <span class="section-label">About you</span>
+      </div>
+      <h3 class="section-title">Your details</h3>
+      <p class="section-sub">So we can send your session materials and report.</p>
+
+      <div class="field-group">
+        <div class="field">
+          <label>Full name <span class="req">*</span></label>
+          <input type="text" name="candidate_name" required placeholder="e.g. Dr Maria Santos">
+        </div>
+        <div class="field">
+          <label>Email address <span class="req">*</span></label>
+          <input type="email" name="candidate_email" required placeholder="your@email.com">
+        </div>
+        <div class="field">
+          <label>Mobile number <span class="req">*</span><span class="hint">for session reminders</span></label>
+          <input type="tel" name="candidate_phone" required placeholder="+61 4XX XXX XXX">
+        </div>
+        <div class="field">
+          <label>CCE exam sitting <span class="req">*</span></label>
+          <select name="exam_sitting" required>
+            <option value="" disabled selected>Select your sitting</option>
+            <option value="june-2026">June 2026</option>
+            <option value="oct-2026">October 2026</option>
+            <option value="nov-2026">November 2026</option>
+            <option value="jan-2027">January 2027</option>
+            <option value="other">Other / not yet sitting</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 02 · Partner                            -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num">02</span>
+        <span class="section-label">Role-play partner</span>
+      </div>
+      <h3 class="section-title">Your partner's details</h3>
+      <p class="section-sub">We'll send them their case materials 24 hours before your session.</p>
+
+      <div class="field-group">
+        <div class="field">
+          <label>Partner's full name <span class="req">*</span></label>
+          <input type="text" name="partner_name" required placeholder="e.g. Dr James O'Brien">
+        </div>
+        <div class="field">
+          <label>Partner's email <span class="req">*</span></label>
+          <input type="email" name="partner_email" required placeholder="partner@email.com">
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <label class="attest-item">
+          <input type="checkbox" name="partner_confirmed" required>
+          <span><strong>My partner has agreed to play the role</strong> and will be available for the full duration of my scheduled session(s). I understand they will receive case materials in advance and are expected to prepare.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 03 · Package                            -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num">03</span>
+        <span class="section-label">Your package</span>
+      </div>
+      <h3 class="section-title">Which package did you purchase?</h3>
+      <p class="section-sub">Pricing is shown for reference. Your payment has already been completed.</p>
+
+      <div class="option-list" id="package-list">
+        <label class="option">
+          <input type="radio" name="package" value="single" required>
+          <div class="option-body">
+            <div class="option-title">Single station</div>
+            <div class="option-desc">1 clinical encounter <em>or</em> 1 case discussion — your choice</div>
+          </div>
+        </label>
+        <label class="option">
+          <input type="radio" name="package" value="two-pack">
+          <div class="option-body">
+            <div class="option-title">2-Pack</div>
+            <div class="option-desc">1 clinical encounter + 1 case discussion</div>
+          </div>
+        </label>
+        <label class="option">
+          <input type="radio" name="package" value="four-pack">
+          <div class="option-body">
+            <div class="option-title">4-Pack — Full Format Coverage</div>
+            <div class="option-desc">2 clinical encounters + 2 case discussions</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 04 · Session format                     -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num">04</span>
+        <span class="section-label">Session format</span>
+      </div>
+      <h3 class="section-title">How would you like to run your session?</h3>
+      <p class="section-sub">Zoom is simpler. We handle the recording. Self-record gives you flexibility.</p>
+
+      <div class="option-list" id="format-list">
+        <label class="option">
+          <input type="radio" name="format" value="self-record" required>
+          <div class="option-body">
+            <div class="option-title">Self-record</div>
+            <div class="option-desc">You record the station on your own device (phone or laptop) and send the video to us.</div>
+          </div>
+        </label>
+        <label class="option">
+          <input type="radio" name="format" value="zoom">
+          <div class="option-body">
+            <div class="option-title">Zoom session</div>
+            <div class="option-desc">You and your partner join a Zoom meeting at a scheduled time. We handle the recording — nothing to upload.</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Zoom reveal -->
+      <div class="reveal" id="zoom-reveal">
+        <div class="reveal-head">If you choose Zoom</div>
+        <h4>Here's what happens</h4>
+        <p>Choose your preferred date and time below. <strong>24 hours before your session</strong>, both you and your partner will receive an email with the full session details and Zoom link.</p>
+        <p>Your partner will also receive the case script at that point — they're expected to read and prepare. <strong>You (the candidate) will only receive your case information at the start of your session.</strong> You will have 5 minutes to read through it before your 15-minute station begins, exactly as you would in the real exam.</p>
+        <p>At the scheduled time, you and your partner join the Zoom. The meeting auto-records to our cloud. Once you're done, simply leave the meeting and we'll handle the rest.</p>
+
+        <div class="fields">
+          <div class="field">
+            <label>Preferred date <span class="req">*</span></label>
+            <input type="date" name="zoom_date" id="zoom_date">
+          </div>
+          <div class="field">
+            <label>Preferred time <span class="req">*</span></label>
+            <input type="time" name="zoom_time" id="zoom_time">
+          </div>
+          <div class="field">
+            <label>Timezone <span class="req">*</span></label>
+            <select name="zoom_timezone" id="zoom_timezone">
+              <option value="" disabled selected>Select</option>
+              <option value="aest">AEST / Brisbane · Sydney</option>
+              <option value="aedt">AEDT / Melbourne · Canberra (DST)</option>
+              <option value="acst">ACST / Adelaide · Darwin</option>
+              <option value="awst">AWST / Perth</option>
+              <option value="nzst">NZST / Auckland</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div id="zoom-blocked-warning" style="display:none; margin-top:16px; background:#fdf0f0; border:1px solid #c97070; border-radius:3px; padding:14px 18px; font-size:13.5px; color:#b04040; line-height:1.55;">
+          This time slot is already fully booked. Please select a different date or time.
+        </div>
+      </div>
+
+      <!-- Self-record reveal -->
+      <div class="reveal" id="self-record-reveal">
+        <div class="reveal-head">If you choose self-record</div>
+        <h4>Here's what happens</h4>
+        <p>24 hours before your chosen recording date, <strong>your partner will receive their case materials by email.</strong> They are expected to read and prepare in advance.</p>
+        <p>On the day of your recording, <strong>you will receive your case information by email.</strong> Do not open it until you are set up and ready to begin.</p>
+        <p><strong>You (the candidate) must not open or read the case documents until you are ready to record your station.</strong> Opening the case early compromises the integrity of the mock — you'd be testing your ability to rehearse, not perform.</p>
+        <p>Record the station on your own device (phone camera or laptop webcam). Start the recording, open your case information, and take 5 minutes to read through it. When you are ready, say <em>"starting now"</em> on camera and run the 15-minute station. Each station is 20 minutes in total. When done, send the video to us.</p>
+
+        <div class="fields" style="grid-template-columns: 1fr 1fr;">
+          <div class="field">
+            <label>Expected recording date <span class="req">*</span></label>
+            <input type="date" name="self_date" id="self_date">
+          </div>
+          <div class="field">
+            <label>How you'll record <span class="req">*</span></label>
+            <select name="self_device" id="self_device">
+              <option value="" disabled selected>Select</option>
+              <option value="phone">Phone camera</option>
+              <option value="laptop">Laptop webcam</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 05 · Station selections                 -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num">05</span>
+        <span class="section-label">Station selections</span>
+      </div>
+      <h3 class="section-title">Which stations would you like?</h3>
+      <p class="section-sub">You'll be assigned cases in these domains. The specific case details stay hidden until your session day.</p>
+
+      <div class="selector-helper" id="selector-helper">
+        <span class="icon">i</span>
+        <span id="selector-helper-text"><strong>Select your package first</strong> to see how many stations you can pick.</span>
+      </div>
+
+      <!-- Clinical Encounter group -->
+      <div class="station-group">
+        <div class="station-group-head">
+          <div class="station-group-title">Clinical Encounter — role-played consultation</div>
+          <div class="station-counter" id="ce-counter">0 selected</div>
+        </div>
+        <div class="station-grid" id="ce-grid">
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-emergency" data-group="ce">
+            <span>Emergency</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-cardio" data-group="ce">
+            <span>Cardiovascular</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-resp" data-group="ce">
+            <span>Respiratory</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-gastro" data-group="ce">
+            <span>Gastroenterology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-endocrine" data-group="ce">
+            <span>Endocrine</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-renal" data-group="ce">
+            <span>Renal &amp; Urinary</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-msk" data-group="ce">
+            <span>Musculoskeletal</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-neuro" data-group="ce">
+            <span>Neurology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-mental" data-group="ce">
+            <span>Mental Health</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-womens" data-group="ce">
+            <span>Women's Health</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-paeds" data-group="ce">
+            <span>Paediatrics</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-derm" data-group="ce">
+            <span>Dermatology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-haem" data-group="ce">
+            <span>Haematology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-rheum" data-group="ce">
+            <span>Rheumatology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-sexual" data-group="ce">
+            <span>Sexual Health &amp; Gender</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-mens" data-group="ce">
+            <span>Men's Health</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-ophth" data-group="ce">
+            <span>Ophthalmology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-ent" data-group="ce">
+            <span>ENT</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-pharma" data-group="ce">
+            <span>Pharmacology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-preventive" data-group="ce">
+            <span>Preventive</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-medico" data-group="ce">
+            <span>Medicolegal &amp; Ethics</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_ce" value="ce-cultural" data-group="ce">
+            <span>Cultural &amp; Tropical</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Case Discussion group -->
+      <div class="station-group">
+        <div class="station-group-head">
+          <div class="station-group-title">Case Discussion — reasoning &amp; management</div>
+          <div class="station-counter" id="cd-counter">0 selected</div>
+        </div>
+        <div class="station-grid" id="cd-grid">
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-emergency" data-group="cd">
+            <span>Emergency</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-cardio" data-group="cd">
+            <span>Cardiovascular</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-resp" data-group="cd">
+            <span>Respiratory</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-gastro" data-group="cd">
+            <span>Gastroenterology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-endocrine" data-group="cd">
+            <span>Endocrine</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-renal" data-group="cd">
+            <span>Renal &amp; Urinary</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-msk" data-group="cd">
+            <span>Musculoskeletal</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-neuro" data-group="cd">
+            <span>Neurology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-mental" data-group="cd">
+            <span>Mental Health</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-womens" data-group="cd">
+            <span>Women's Health</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-paeds" data-group="cd">
+            <span>Paediatrics</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-derm" data-group="cd">
+            <span>Dermatology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-haem" data-group="cd">
+            <span>Haematology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-rheum" data-group="cd">
+            <span>Rheumatology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-sexual" data-group="cd">
+            <span>Sexual Health &amp; Gender</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-mens" data-group="cd">
+            <span>Men's Health</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-ophth" data-group="cd">
+            <span>Ophthalmology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-ent" data-group="cd">
+            <span>ENT</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-pharma" data-group="cd">
+            <span>Pharmacology</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-preventive" data-group="cd">
+            <span>Preventive</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-medico" data-group="cd">
+            <span>Medicolegal &amp; Ethics</span>
+          </label>
+          <label class="station-option">
+            <input type="checkbox" name="station_cd" value="cd-cultural" data-group="cd">
+            <span>Cultural &amp; Tropical</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 06 · Feedback expectations              -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num">06</span>
+        <span class="section-label">Your expectations</span>
+      </div>
+      <h3 class="section-title">What do you expect from your written feedback?</h3>
+      <p class="section-sub">This helps Dr. Shaun tailor the depth and focus of your performance report.</p>
+
+      <div class="field-group single">
+        <div class="field">
+          <label>Your expectations <span class="req">*</span></label>
+          <textarea name="feedback_expectations" required rows="5" placeholder="e.g. I'd like detailed feedback on my communication style, where I lost marks, and specific suggestions for improvement in each domain..." style="resize: vertical;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 07 · Attestations                       -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num">07</span>
+        <span class="section-label">Before you submit</span>
+      </div>
+      <h3 class="section-title">Please confirm the following</h3>
+      <p class="section-sub">These protect the integrity of your mock and everyone else's in your cohort.</p>
+
+      <div>
+        <label class="attest-item">
+          <input type="checkbox" required>
+          <span>I understand the <strong>case must remain unseen by me</strong> (the candidate) until the scheduled station start time. My partner may read the case in advance to prepare their role-play.</span>
+        </label>
+        <label class="attest-item">
+          <input type="checkbox" required>
+          <span>I will <strong>not discuss my case selections or case content</strong> with other SPR candidates in my cohort.</span>
+        </label>
+        <label class="attest-item">
+          <input type="checkbox" required>
+          <span>I <strong>consent to my session being recorded</strong>, reviewed by Dr Shaun and Fellow Academy Team, and retained securely.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Submit                                  -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="submit-section">
+      <p>After submission, you'll receive a confirmation email within a few minutes.<br>Your session details &amp; case materials arrive separately, per the schedule above.</p>
+      <div class="error-banner" id="error-banner">
+        Something went wrong submitting your form. Please try again, or email <strong>hello@fellowacademy.com</strong> directly.
+      </div>
+      <button type="submit" id="submit-btn">Submit intake form</button>
+    </div>
+
+  </form>
+
+  <!-- Success state -->
+  <div class="success-card" id="success-card">
+    <h2>Thank you.</h2>
+    <p>Your intake form has been received. We'll be in touch shortly with your confirmation and next steps.</p>
+    <p style="color: var(--text-faint); font-size: 12.5px; font-style: italic; font-family: 'Playfair Display', serif;">If you don't hear from us within 24 hours, email <a href="mailto:support@fellowacademy.com.au" style="color: var(--gold);">support@fellowacademy.com.au</a></p>
+  </div>
+
+  <div class="footer">
+    <span>Fellow Academy</span>
+    <span>CCE Station Performance Review</span>
+  </div>
+
+</div>
+
+<script>
+  // ══════════════════════════════════════════════════════
+  //  CONFIGURATION — paste your Google Apps Script URL here
+  //  after you deploy it (see google_apps_script.js for setup)
+  // ══════════════════════════════════════════════════════
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgWKNM8NOmZdop4U817OQ7t2En5FC28bDaFGuwUFimbNQpxA5ZNfHPGxS8g5QPjXnI/exec';
+
+  // ── Progressive-disclosure: Zoom vs self-record ──────────
+  const formatRadios = document.querySelectorAll('input[name="format"]');
+  const zoomReveal = document.getElementById('zoom-reveal');
+  const selfReveal = document.getElementById('self-record-reveal');
+  const zoomFields = ['zoom_date', 'zoom_time', 'zoom_timezone'];
+  const selfFields = ['self_date', 'self_device'];
+
+  formatRadios.forEach(r => {
+    r.addEventListener('change', () => {
+      const isZoom = r.value === 'zoom' && r.checked;
+      const isSelf = r.value === 'self-record' && r.checked;
+
+      zoomReveal.classList.toggle('active', isZoom);
+      selfReveal.classList.toggle('active', isSelf);
+
+      // Toggle required attrs accordingly
+      zoomFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.required = isZoom;
+      });
+      selfFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.required = isSelf;
+      });
+
+      updateSelectedStyling();
+    });
+  });
+
+  // ── Option-card selected styling ────────────────────────
+  function updateSelectedStyling() {
+    document.querySelectorAll('.option').forEach(opt => {
+      const input = opt.querySelector('input[type="radio"], input[type="checkbox"]');
+      if (input) opt.classList.toggle('selected', input.checked);
+    });
+    document.querySelectorAll('.station-option').forEach(opt => {
+      const input = opt.querySelector('input[type="checkbox"]');
+      if (input) opt.classList.toggle('selected', input.checked);
+    });
+  }
+
+  document.querySelectorAll('.option input, .station-option input').forEach(inp => {
+    inp.addEventListener('change', updateSelectedStyling);
+  });
+
+  // ── Package-based station selection limits ──────────────
+  const packageRadios = document.querySelectorAll('input[name="package"]');
+  const helperText = document.getElementById('selector-helper-text');
+  const ceCounter = document.getElementById('ce-counter');
+  const cdCounter = document.getElementById('cd-counter');
+  const ceBoxes = document.querySelectorAll('input[data-group="ce"]');
+  const cdBoxes = document.querySelectorAll('input[data-group="cd"]');
+
+  // limits: { ceMin, ceMax, cdMin, cdMax, helperHtml }
+  const limits = {
+    'single':    { ce: [0, 1], cd: [0, 1], total: 1, help: 'Pick <strong>any 1 station</strong> — either a clinical encounter or a case discussion.' },
+    'two-pack':  { ce: [1, 1], cd: [1, 1], total: 2, help: 'Pick <strong>1 clinical encounter + 1 case discussion</strong>.' },
+    'four-pack': { ce: [2, 2], cd: [2, 2], total: 4, help: 'Pick <strong>2 clinical encounters + 2 case discussions</strong>.' }
+  };
+
+  function getSelectedCount(boxes) {
+    return Array.from(boxes).filter(b => b.checked).length;
+  }
+
+  function enforceLimits() {
+    const selected = document.querySelector('input[name="package"]:checked');
+    if (!selected) {
+      helperText.innerHTML = '<strong>Select your package first</strong> to see how many stations you can pick.';
+      return;
+    }
+    const lim = limits[selected.value];
+    helperText.innerHTML = lim.help;
+
+    const ceSel = getSelectedCount(ceBoxes);
+    const cdSel = getSelectedCount(cdBoxes);
+
+    // Counters
+    const ceTarget = lim.ce[1];
+    const cdTarget = lim.cd[1];
+
+    if (selected.value === 'single') {
+      // Either-or — total must be 1
+      const total = ceSel + cdSel;
+      ceCounter.textContent = ceSel + ' selected';
+      cdCounter.textContent = cdSel + ' selected';
+      ceCounter.classList.toggle('complete', total === 1);
+      cdCounter.classList.toggle('complete', total === 1);
+      ceCounter.classList.toggle('over', total > 1);
+      cdCounter.classList.toggle('over', total > 1);
+
+      // Disable whichever group once a selection is made
+      ceBoxes.forEach(b => {
+        if (!b.checked) b.disabled = (total >= 1);
+        b.parentElement.classList.toggle('disabled', b.disabled);
+      });
+      cdBoxes.forEach(b => {
+        if (!b.checked) b.disabled = (total >= 1);
+        b.parentElement.classList.toggle('disabled', b.disabled);
+      });
+    } else {
+      ceCounter.textContent = `${ceSel} of ${ceTarget} selected`;
+      cdCounter.textContent = `${cdSel} of ${cdTarget} selected`;
+      ceCounter.classList.toggle('complete', ceSel === ceTarget);
+      cdCounter.classList.toggle('complete', cdSel === cdTarget);
+      ceCounter.classList.toggle('over', ceSel > ceTarget);
+      cdCounter.classList.toggle('over', cdSel > cdTarget);
+
+      // Cap each group at max
+      ceBoxes.forEach(b => {
+        if (!b.checked) b.disabled = (ceSel >= ceTarget);
+        b.parentElement.classList.toggle('disabled', b.disabled);
+      });
+      cdBoxes.forEach(b => {
+        if (!b.checked) b.disabled = (cdSel >= cdTarget);
+        b.parentElement.classList.toggle('disabled', b.disabled);
+      });
+    }
+  }
+
+  packageRadios.forEach(r => r.addEventListener('change', () => {
+    // Clear selections when switching package
+    ceBoxes.forEach(b => { b.checked = false; b.disabled = false; b.parentElement.classList.remove('disabled'); });
+    cdBoxes.forEach(b => { b.checked = false; b.disabled = false; b.parentElement.classList.remove('disabled'); });
+    updateSelectedStyling();
+    enforceLimits();
+  }));
+
+  [...ceBoxes, ...cdBoxes].forEach(b => b.addEventListener('change', () => {
+    enforceLimits();
+    updateSelectedStyling();
+  }));
+
+  // ── Blocked Zoom time slots ─────────────────────────────
+  // All periods stored as AEST (UTC+10) date + minutes-from-midnight
+  const blockedPeriods = [
+    { date: '2026-05-30', start: 600,  end: 720  }, // May 30  10:00–12:00 AEST
+    { date: '2026-05-31', start: 630,  end: 750  }, // May 31  10:30–12:30 AEST
+    { date: '2026-06-05', start: 780,  end: 900  }, // Jun  5  13:00–15:00 AEST
+  ];
+
+  // UTC offset in minutes for each timezone option
+  const tzOffsetMin = {
+    aest: 600,   // UTC+10
+    aedt: 660,   // UTC+11
+    acst: 570,   // UTC+9:30
+    awst: 480,   // UTC+8
+    nzst: 720,   // UTC+12
+  };
+
+  function checkZoomAvailability() {
+    const dateVal = document.getElementById('zoom_date').value;
+    const timeVal = document.getElementById('zoom_time').value;
+    const tzVal   = document.getElementById('zoom_timezone').value;
+    const warning = document.getElementById('zoom-blocked-warning');
+
+    if (!dateVal || !timeVal || !tzVal || !tzOffsetMin[tzVal]) {
+      warning.style.display = 'none';
+      return true;
+    }
+
+    const [h, m]     = timeVal.split(':').map(Number);
+    const localMins  = h * 60 + m;
+    const localOffset = tzOffsetMin[tzVal];
+
+    // Convert to AEST: local → UTC → AEST
+    let aestMins = localMins - localOffset + 600;
+    let aestDate = new Date(dateVal + 'T12:00:00'); // noon to avoid DST edge issues
+
+    if (aestMins < 0)    { aestMins += 1440; aestDate.setDate(aestDate.getDate() - 1); }
+    if (aestMins >= 1440){ aestMins -= 1440; aestDate.setDate(aestDate.getDate() + 1); }
+
+    const aestDateStr = aestDate.toISOString().split('T')[0];
+
+    const blocked = blockedPeriods.some(p =>
+      p.date === aestDateStr && aestMins >= p.start && aestMins < p.end
+    );
+
+    warning.style.display = blocked ? 'block' : 'none';
+    return !blocked;
+  }
+
+  ['zoom_date', 'zoom_time', 'zoom_timezone'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', checkZoomAvailability);
+  });
+
+  // ── Submit handler ──────────────────────────────────────
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    // Validate station selections against package
+    const selected = document.querySelector('input[name="package"]:checked');
+    if (!selected) { alert('Please select a package.'); return false; }
+    const lim = limits[selected.value];
+    const ceSel = getSelectedCount(ceBoxes);
+    const cdSel = getSelectedCount(cdBoxes);
+    const total = ceSel + cdSel;
+
+    if (selected.value === 'single') {
+      if (total !== 1) { alert('Please select exactly 1 station for the Single package.'); return false; }
+    } else {
+      if (ceSel !== lim.ce[1] || cdSel !== lim.cd[1]) {
+        alert(`Please select exactly ${lim.ce[1]} clinical encounter(s) and ${lim.cd[1]} case discussion(s).`);
+        return false;
+      }
+    }
+
+    // Collect all form data into a plain object
+    const form = document.getElementById('spr-form');
+    const fd = new FormData(form);
+
+    // Friendly label maps for the email
+    const packageLabels = { 'single': 'Single station ($199)', 'two-pack': '2-Pack ($299)', 'four-pack': '4-Pack — Full Format Coverage ($479)' };
+    const formatLabels  = { 'zoom': 'Zoom session', 'self-record': 'Self-record' };
+    const sittingLabels = { 'june-2026': 'June 2026', 'oct-2026': 'October 2026', 'nov-2026': 'November 2026', 'jan-2027': 'January 2027', 'other': 'Other / not yet sitting' };
+    const stationLabels = {
+      'ce-emergency': 'Emergency', 'ce-cardio': 'Cardiovascular', 'ce-resp': 'Respiratory',
+      'ce-gastro': 'Gastroenterology', 'ce-endocrine': 'Endocrine', 'ce-renal': 'Renal & Urinary',
+      'ce-msk': 'Musculoskeletal', 'ce-neuro': 'Neurology', 'ce-mental': 'Mental Health',
+      'ce-womens': "Women's Health", 'ce-paeds': 'Paediatrics', 'ce-derm': 'Dermatology',
+      'ce-haem': 'Haematology', 'ce-rheum': 'Rheumatology', 'ce-sexual': 'Sexual Health & Gender',
+      'ce-mens': "Men's Health", 'ce-ophth': 'Ophthalmology', 'ce-ent': 'ENT',
+      'ce-pharma': 'Pharmacology', 'ce-preventive': 'Preventive', 'ce-medico': 'Medicolegal & Ethics',
+      'ce-cultural': 'Cultural & Tropical',
+      'cd-emergency': 'Emergency', 'cd-cardio': 'Cardiovascular', 'cd-resp': 'Respiratory',
+      'cd-gastro': 'Gastroenterology', 'cd-endocrine': 'Endocrine', 'cd-renal': 'Renal & Urinary',
+      'cd-msk': 'Musculoskeletal', 'cd-neuro': 'Neurology', 'cd-mental': 'Mental Health',
+      'cd-womens': "Women's Health", 'cd-paeds': 'Paediatrics', 'cd-derm': 'Dermatology',
+      'cd-haem': 'Haematology', 'cd-rheum': 'Rheumatology', 'cd-sexual': 'Sexual Health & Gender',
+      'cd-mens': "Men's Health", 'cd-ophth': 'Ophthalmology', 'cd-ent': 'ENT',
+      'cd-pharma': 'Pharmacology', 'cd-preventive': 'Preventive', 'cd-medico': 'Medicolegal & Ethics',
+      'cd-cultural': 'Cultural & Tropical'
+    };
+
+    const pkg   = fd.get('package') || '';
+    const fmt   = fd.get('format')  || '';
+    const sit   = fd.get('exam_sitting') || '';
+
+    const ceSelected = Array.from(ceBoxes).filter(b => b.checked).map(b => stationLabels[b.value] || b.value);
+    const cdSelected = Array.from(cdBoxes).filter(b => b.checked).map(b => stationLabels[b.value] || b.value);
+
+    const data = {
+      submitted_at:     new Date().toISOString(),
+      candidate_name:   fd.get('candidate_name')  || '',
+      candidate_email:  fd.get('candidate_email') || '',
+      candidate_phone:  fd.get('candidate_phone') || '',
+      exam_sitting:     sittingLabels[sit] || sit,
+      partner_name:     fd.get('partner_name')    || '',
+      partner_email:    fd.get('partner_email')   || '',
+      package:          packageLabels[pkg] || pkg,
+      format:           formatLabels[fmt]  || fmt,
+      zoom_date:        fd.get('zoom_date')       || '',
+      zoom_time:        fd.get('zoom_time')       || '',
+      zoom_timezone:    fd.get('zoom_timezone')   || '',
+      self_date:        fd.get('self_date')       || '',
+      self_device:      fd.get('self_device')     || '',
+      stations_ce:              ceSelected.join(', '),
+      stations_cd:              cdSelected.join(', '),
+      feedback_expectations:    fd.get('feedback_expectations') || ''
+    };
+
+    // Block submission if a blocked Zoom slot is selected
+    const selectedFormat = document.querySelector('input[name="format"]:checked');
+    if (selectedFormat && selectedFormat.value === 'zoom' && !checkZoomAvailability()) {
+      alert('The selected Zoom time is not available. Please choose a different date or time.');
+      return false;
+    }
+
+    // UI: loading state
+    const btn = document.getElementById('submit-btn');
+    const errorBanner = document.getElementById('error-banner');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+    errorBanner.classList.remove('active');
+
+    // POST to Google Apps Script
+    // Uses text/plain + no-cors to avoid CORS preflight; the script still receives and processes it fine
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(data),
+      mode: 'no-cors'
+    })
+    .then(() => {
+      // no-cors gives an opaque response — we can't read it, but if fetch resolves the request went through
+      form.style.display = 'none';
+      document.getElementById('success-card').classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    })
+    .catch(() => {
+      errorBanner.classList.add('active');
+      btn.disabled = false;
+      btn.textContent = 'Submit intake form';
+    });
+
+    return false;
+  }
+</script>
+</body>
+</html>
