@@ -33,7 +33,7 @@
   }
   .wrap { max-width: 1520px; margin: 0 auto; transition: padding-right .3s cubic-bezier(.2,.8,.2,1); }
   /* wide screens: an open drawer pushes the content left instead of covering the calendar */
-  @media (min-width: 1200px) { body.panel-open .wrap { padding-right: 412px; } }
+  @media (min-width: 1200px) { body.panel-open .wrap { max-width: none; padding-right: 412px; } }
 
   .raised { background: var(--base); border-radius: var(--r); box-shadow: -8px -8px 18px var(--light), 8px 8px 18px var(--dark); }
   .inset  { background: var(--base); border-radius: 14px; box-shadow: inset -4px -4px 10px var(--light), inset 4px 4px 10px var(--dark); }
