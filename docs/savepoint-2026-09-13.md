@@ -1,56 +1,58 @@
-# Savepoint 2026-09-13 18:05 (Asia/Manila)
+# Savepoint 2026-09-13 21:30 (Asia/Manila)
 
-Branch: `feature/date-rules` (not pushed). Spec and progress log: `SPEC.md`. Last feature commit 855bb60.
+Branch: `main` (feature/date-rules merged fast-forward and pushed). Spec and progress log: `SPEC.md`. Last commit 73c46dc.
+Live site: https://fellow-academy-cce-spr-intake.netlify.app (Netlify deploys main).
+
+## Production stack (moved 2026-09-13 ~21:10 Manila)
+
+| Thing | Value |
+|---|---|
+| Prod sheet | "SPR Intakes", owner support@fellowacademy.com.au, id `1WOCgd-xi1RUGHu8JhexLzaMFzqeatNowLA3rpmkffJs`; editors jeraisy.swnco@gmail.com, agustin.ellanamickaela@gmail.com |
+| Prod script (bound) | `1I3mi_pchiipFW0EX8CgAOay_ZqoEjNGXd40uREJ8t1XAWMJud594tgcR` (`.clasp.prod.json`, clasp profile `prod` = support@) |
+| Form deployment (live, in index.html) | `AKfycbxBcdRp88zDFCBap3UxxYnyQJXi8rigtRupDZrkFZcWQFBEL2olUwn1VFSOl43Q7fO-8Q` @3, execute as owner, anyone anonymous |
+| Admin deployment | `AKfycbwzDS_QVs4IJgTFG7K8r44vr3qAErcC_isXWEtL0_v12keHS8v05PTjlTap_GcjUtDv1g` @2, execute as user accessing, anyone (ADMIN_EMAILS gates) → `…/exec?page=admin` |
+| Dev (former prod) | Sheet "SPR Intakes" owned by jeraisy.swnco@gmail.com, script `1jz9VT…` (`.clasp.json`), deployments in deploy.sh `dev` case |
+| Old original prod | "SPR Intakes Backend" (support@), original script untouched; superseded |
 
 ## Phase table
 
 | Item | State | Proof |
 |---|---|---|
-| Backups of prod sheet | Done | Drive copy "SPR Intakes — BACKUP 2026-09-13" (support account); `backups/*.csv` local, gitignored |
-| Dev sheet + dev script | Done | "SPR Intakes — DEV" owned by jeraisy.swnco@gmail.com; script id in `.clasp.json` |
-| Page picks script URL by host | Done | `index.html` SCRIPT_URL_DEV on localhost/file/`?env=dev`, prod otherwise |
-| Phase 1: Settings/Dates tabs + GET availability | Done, deployed dev public @3 | curl GET returns `{today,minDate,maxDate,unavailable[]}` matching real bookings |
-| Phase 2: POST validation under lock | Done, deployed dev public @3 | too_soon / full / missing_date rejected; success then full on same date |
-| Phase 3: candidate calendar + reads reply | Verified on localhost | Headless Chrome on http://localhost:5173: 1–14 Sep off, 15/16/17/19/20/24 struck through, 18+ open; both Zoom and self-record calendars |
-| Phase 4: admin page | Done, deployed dev admin @11 | Full-width calendar, drawer with handle, shift-click range block; Jeraisy approved drawer in browser |
-| Admin access for other allow-listed accounts | Deployment fixed (ANYONE @7); sheet share pending | Ellana now gets "You do not have permission to access the requested document" until DEV sheet is shared |
-| Candidate page neumorphic redesign | Coded, verified headless, awaiting Jeraisy's eye | Stylesheet only (markup/script identical to backup except time field); classic design at `docs/design-backup/index-classic-2026-09-13.html` |
-| Branded pickers | Done | Time = 3 selects → hidden zoom_time HH:MM (5/40/PM → 17:40); selects `appearance: base-select` in Chrome/Edge, native fallback elsewhere |
-| Blocked-date live round trip | Not done | Needs an admin to block a day on dev, then re-run headless check |
-| Phase 5: prod rollout | Not started | — |
+| Date rules (lead 2, capacity, blocked, override) | Live | Live endpoint returns `{today,minDate,maxDate,unavailable[]}`; 19/19 rule tests |
+| Candidate page (minimalist, brand fonts, branded pickers) | Live | Netlify serves page with new form URL (checked 21:16); headless Chrome verified greyed days before the move |
+| Admin page: calendar, drawer, range block, move booking + email, search, names on days | Live @2 | support@ opened it and saw blocked dates; move flow verified in preview and on dev with real email |
+| Emails from support@ | Live | Form deployment runs as support@; move emails sent by whoever moves, From support@ only if that account has the alias |
+| Old→new data | Copy taken 21:03 | Submissions on Jeraisy's sheet after 21:03 must be pasted across by hand |
 
 ## Credentials present locally (names only)
-- clasp login token in `~/.clasprc.json` (Google account jeraisy.swnco@gmail.com)
-- No `.env` files. Script exec URLs are public by design and live in `index.html` and `apps-script/deploy.sh`.
+- `~/.clasprc.json` tokens: `default` (jeraisy.swnco@gmail.com), `prod` (support@fellowacademy.com.au)
+- No `.env`. Script exec URLs are public by design (index.html, deploy.sh).
 
 ## Next actions
-1. Jeraisy: open http://localhost:5173 (start with `node <scratchpad>/serve.js .` or any static server; `file://` also works) and approve or adjust the neumorphic candidate page. Blocked on Jeraisy.
-2. Jeraisy: share the DEV sheet with agustin.ellanamickaela@gmail.com as Editor, then Ellana reloads the admin page. Blocked on Jeraisy.
-3. Jeraisy: in admin, block one open day (or shift-click a range) and save; Claude re-runs the headless check to confirm it turns unavailable on the candidate calendar. Blocked on Jeraisy.
-4. Claude: `git push -u origin feature/date-rules` when Jeraisy says push.
-5. Prod rollout in SPEC.md order: paste `Code.gs` + `admin.html` into prod script, New version on the existing public deployment, add admin deployment (execute as user accessing, access Anyone), share prod sheet with every ADMIN_EMAILS account as Editor, then merge to main. Republish the dev public deployment too (`deploy.sh dev public`) since Code.gs changed after @3.
+1. Jeraisy and Ellana: open the new admin URL once from their Gmail accounts and accept the consent (unverified-app step). Blocked on them.
+2. Jeraisy: compare the old sheet (own Drive) with the new one for rows after 21:03 Manila and paste any across; rename the old sheet "OLD". Blocked on Jeraisy.
+3. Routine: `bash apps-script/deploy.sh prod all` after any Code.gs/admin.html change; push main for index.html changes.
 
 ## Resume commands
 ```
-node tests/rules.test.js                 # 19 rule checks
-bash apps-script/deploy.sh dev all       # push + republish both dev deployments
-bash apps-script/deploy.sh dev admin     # admin only
-curl -sS -L "<public exec url>"          # availability JSON
+node tests/rules.test.js                       # 19 rule checks
+bash apps-script/deploy.sh prod all            # push + republish live form + admin (clasp profile prod)
+bash apps-script/deploy.sh dev all             # former project on Jeraisy's sheet
+clasp --user prod -P .clasp.prod.json deployments
+curl -sS -L "https://script.google.com/macros/s/AKfycbxBcdRp88zDFCBap3UxxYnyQJXi8rigtRupDZrkFZcWQFBEL2olUwn1VFSOl43Q7fO-8Q/exec"
 ```
-Admin dev page: `https://script.google.com/macros/s/AKfycbx9pxbXowdjzCqkfo-t1F-16cbxL6D3Kj-zOinIKgMybPdmeRcDg2OCvRC-CTjZ_Wn3/exec?page=admin`
-
-Headless check (Chrome at `C:/Program Files/Google/Chrome/Application/chrome.exe`): serve the repo on localhost, then either `chrome --headless=new --dump-dom <url>` and grep `cal-day` classes, or drive it over CDP (`--remote-debugging-port`, Node's built-in WebSocket) to click a format radio before screenshotting, because the calendars live inside hidden reveal panels.
+Headless check of the candidate page: serve the repo on localhost (`node <scratchpad>/serve.js .`), drive Chrome over CDP to click a format radio, then read `.cal-day` classes. Admin preview mode (no server) at `/apps-script/admin.html` exercises the client with a mock.
 
 ## Gotchas
-- Web-app executeAs/access are stored in `appsscript.json` per version; `deploy.sh` rewrites it before each deploy. Never `clasp deploy` without it.
-- Admin deployment access must be ANYONE. MYSELF (or DOMAIN for gmail admins) makes Google show "Sorry, unable to open the file at this time" before doGet runs.
-- Admin page executes as the signed-in user, so every admin needs Editor on the sheet, or they get "You do not have permission to access the requested document".
-- Google's "This application was created by a Google Apps Script user" banner cannot be removed by the page. It is hidden only for viewers in the script owner's Workspace domain. Iframe embedding hides it but breaks sign-in under third-party cookie blocking; rejected.
-- Claude Code's auto-mode classifier blocks `deploy.sh` runs that widen deployment access; Jeraisy runs those with `! bash apps-script/deploy.sh dev admin`.
-- `clasp clone` overwrites local files; only clone into a scratch dir.
-- Testing POST with curl: capture the 302 Location and GET it. `curl -L` re-POSTs and Google returns 411.
-- Sheet date cells come back as Date objects; `toDateStr` normalises with the spreadsheet timezone.
-- Hidden inputs ignore `required`; calendar dates are validated in `handleSubmit`. The three time selects are in `zoomFields` so they toggle required with the Zoom format.
-- Drawer handle must live inside the drawer element (panel `overflow: visible`, inner `.panel-scroll` scrolls) so it moves with the transform.
-- Global `label` rule is small uppercase gold; option/station/attest labels override it or their descriptions render as spaced capitals.
-- Native `<input type="time">` and native select menus cannot be styled; use selects with `appearance: base-select` (Chrome/Edge) and compose values into a hidden input.
+- `clasp create --type sheets --parentId X` ignores X and creates a new spreadsheet; use `--parentId` alone to bind to an existing sheet.
+- An execute-as-owner deployment answers 403 then 404 ("page not found") until the owner has consented in a browser and the deployment is republished afterwards.
+- When manifest scopes change, existing users are not re-prompted reliably; remove the app at myaccount.google.com/permissions and reopen the page.
+- Workspace policy blocked support@ from opening the Gmail-owned admin app; an app owned inside the Workspace opens fine.
+- Consumer Gmail cannot transfer Drive ownership to a Workspace account; copy the sheet under the Workspace account instead. Drive-API copy carries the bound script along.
+- Web-app executeAs/access live in the manifest per version; deploy.sh rewrites appsscript.json per target.
+- Admin page runs as the signed-in user: needs Editor on the sheet, else "You do not have permission to access the requested document".
+- MYSELF/DOMAIN access shows "Sorry, unable to open the file" before doGet; ADMIN_EMAILS is the real gate.
+- From address = the account the script runs as; `from:` only works for a configured "Send mail as" alias. Display name and reply-to are set regardless.
+- Google's "created by a Google Apps Script user" banner cannot be hidden by the page.
+- Native time inputs and select menus can't be styled; three selects + `appearance: base-select` (Chrome/Edge) instead.
+- Testing POST with curl: capture the 302 Location and GET it; `curl -L` re-POSTs and returns 411.
