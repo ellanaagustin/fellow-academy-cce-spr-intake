@@ -31,7 +31,9 @@
     padding: 28px 20px 60px;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1120px; margin: 0 auto; }
+  .wrap { max-width: 1520px; margin: 0 auto; transition: padding-right .3s cubic-bezier(.2,.8,.2,1); }
+  /* wide screens: an open drawer pushes the content left instead of covering the calendar */
+  @media (min-width: 1200px) { body.panel-open .wrap { padding-right: 412px; } }
 
   .raised { background: var(--base); border-radius: var(--r); box-shadow: -8px -8px 18px var(--light), 8px 8px 18px var(--dark); }
   .inset  { background: var(--base); border-radius: 14px; box-shadow: inset -4px -4px 10px var(--light), inset 4px 4px 10px var(--dark); }
@@ -60,11 +62,11 @@
   .nbtn:active, .nbtn.pressed { box-shadow: inset -3px -3px 8px var(--light), inset 3px 3px 8px var(--dark); transform: translateY(1px); }
   .nbtn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
-  .dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 10px; }
+  .dow { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; margin-bottom: 10px; }
   .dow span { text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
-  .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+  .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; }
   .day {
-    position: relative; min-height: 104px; border-radius: 14px; border: none; cursor: pointer;
+    position: relative; min-width: 0; min-height: 104px; border-radius: 14px; border: none; cursor: pointer;
     background: var(--base); color: var(--text); font-family: inherit; text-align: left; padding: 10px 12px;
     display: flex; flex-direction: column; justify-content: space-between;
     box-shadow: -5px -5px 12px var(--light), 5px 5px 12px var(--dark); transition: box-shadow .15s, transform .15s, opacity .15s;
@@ -80,9 +82,16 @@
   .num { font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; }
   .day.blocked .num { text-decoration: line-through; color: var(--blocked); }
   .bk-lines { display: flex; flex-direction: column; gap: 2px; margin: 6px 0 4px; min-width: 0; }
-  .bk-line { display: flex; align-items: baseline; gap: 5px; font-size: 10.5px; line-height: 1.3; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .bk-line i { font-style: normal; color: var(--gold); font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .bk-line { display: flex; align-items: center; gap: 5px; font-size: 11px; line-height: 1.3; color: var(--text); white-space: nowrap; overflow: hidden; min-width: 0; }
+  .bk-line em { font-style: normal; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .bk-line i { font-style: normal; color: var(--gold); font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0; line-height: 1; }
+  .bk-line em { line-height: 1.2; }
   .bk-line.more { color: var(--muted); }
+  .fi { width: 12px; height: 12px; flex-shrink: 0; vertical-align: -2px; display: inline-block; }
+  .fi.zoom { color: var(--gold); }
+  .fi.self { color: var(--open); }
+  .bk .fi { margin-right: 6px; }
+  .legend .fi { width: 11px; height: 11px; }
   .day.past .bk-line { color: var(--muted); }
   .skel .day .bk-line { visibility: hidden; }
   .meta { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -271,6 +280,8 @@
           <span><i class="dot" style="background:var(--full)"></i> Full</span>
           <span><i class="dot" style="background:var(--blocked)"></i> Blocked</span>
           <span><i class="dot" style="background:var(--gold)"></i> Today / has note</span>
+          <span><svg class="fi zoom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg> Zoom session</span>
+          <span><svg class="fi self" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg> Self-record</span>
           <span style="margin-left:auto">Shift-click a second day to edit a range</span>
         </div>
       </div>
@@ -440,11 +451,17 @@
     }).catch(function (e) { toast('Could not load: ' + (e.message || e), true); });
   }
 
+  function fmtIcon(format) {
+    return /zoom/i.test(format)
+      ? '<svg class="fi zoom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-label="Zoom session"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>'
+      : '<svg class="fi self" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-label="Self-record"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>';
+  }
+
   function dayLines(bookings) {
     if (!bookings || !bookings.length) return '';
     var lines = bookings.slice(0, 2).map(function (b) {
       var t = b.time ? b.time.split(' ')[0] : '';
-      return '<span class="bk-line" title="' + esc(b.name) + (b.time ? ' · ' + esc(b.time) : '') + '">' + (t ? '<i>' + esc(t) + '</i>' : '') + esc(b.name) + '</span>';
+      return '<span class="bk-line" title="' + esc(b.name) + ' · ' + esc(b.format) + (b.time ? ' · ' + esc(b.time) : '') + '">' + fmtIcon(b.format) + (t ? '<i>' + esc(t) + '</i>' : '') + '<em>' + esc(b.name) + '</em></span>';
     });
     if (bookings.length > 2) lines.push('<span class="bk-line more">+' + (bookings.length - 2) + ' more</span>');
     return '<span class="bk-lines">' + lines.join('') + '</span>';
@@ -465,7 +482,7 @@
     }
     var box = $('q-results');
     box.innerHTML = '<div class="rh">' + heading + '</div>' + (hits.length ? hits.slice(0, 30).map(function (b) {
-      return '<button type="button" class="res" data-date="' + b.date + '"><b>' + esc(b.name) + '</b><span>' + longDate(b.date) + ' · ' + esc(b.format) + (b.time ? ' · ' + esc(b.time) : '') + ' · ' + esc(b.package) + '</span><em>' + esc(b.email) + '</em></button>';
+      return '<button type="button" class="res" data-date="' + b.date + '"><b>' + fmtIcon(b.format) + ' ' + esc(b.name) + '</b><span>' + longDate(b.date) + ' · ' + esc(b.format) + (b.time ? ' · ' + esc(b.time) : '') + ' · ' + esc(b.package) + '</span><em>' + esc(b.email) + '</em></button>';
     }).join('') : '<div class="empty">No bookings found.</div>');
     box.hidden = false;
   }
@@ -523,7 +540,7 @@
   function bookingCard(b, d) {
     var link = state.data.sheetUrl + '#gid=' + state.data.sheetId + '&range=A' + b.row;
     return '<div class="bk"><button type="button" class="bk-move" data-row="' + b.row + '" data-date="' + d + '" data-name="' + esc(b.name) + '">Move</button>' +
-      '<b>' + esc(b.name) + '</b><span>' + esc(b.package) + ' · ' + esc(b.format) + (b.time ? ' · ' + esc(b.time) : '') + '</span><br>' +
+      '<b>' + fmtIcon(b.format) + esc(b.name) + '</b><span>' + esc(b.format) + (b.time ? ' · ' + esc(b.time) : '') + ' · ' + esc(b.package) + '</span><br>' +
       '<a href="' + link + '" target="_blank" rel="noopener">Row ' + b.row + ' ↗</a></div>';
   }
 
@@ -605,6 +622,7 @@
     $('scrim').classList.toggle('open', on);
     $('panel').setAttribute('aria-hidden', on ? 'false' : 'true');
     $('panel').classList.toggle('collapsed', !on && !!state.selected);
+    document.body.classList.toggle('panel-open', on);
     $('panel-tab').setAttribute('aria-label', on ? 'Hide day panel' : 'Show day panel');
   }
   $('panel-tab').addEventListener('click', function () { openPanel(!$('panel').classList.contains('open')); });
